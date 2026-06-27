@@ -2,470 +2,442 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADHD Medication Calibrated Tracker</title>
-    <!-- Chart.js CDN for clean, reactive graphing -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Split Dose</title>
+    
+    <!-- PWA iOS Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Split Dose">
+    
+    <!-- iOS Home Screen Icon (Built-in Emoji) -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%233b82f6%22/><text y=%22.72em%22 x=%220.1em%22 font-size=%2270%22>💧</text></svg>">
+    
+    <!-- Desktop Browser Tab Icon (Built-in Emoji) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💧</text></svg>">
+    
+    <!-- Embedded Manifest via Data URI -->
+    <link rel="manifest" href="data:application/json,{%22name%22:%22Split%20Dose%22,%22short_name%22:%22Split%20Dose%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%23f3f4f6%22,%22theme_color%22:%22%234f46e5%22}">
+    
     <style>
         :root {
-            --bg-color: #f4f7f6;
+            --bg: #f9fafb;
             --card-bg: #ffffff;
-            --text-color: #2d3748;
-            --elvanse-color: #3182ce;
-            --amfexa-color: #dd6b20;
-            --total-color: #805ad5;
-            --ref-color: #718096;
-            --sleep-color: #e53e3e;
+            --text: #1f2937;
+            --primary: #3b82f6;
+            --primary-light: #dbeafe;
+            --secondary: #e5e7eb;
+            --accent: #f43f5e;
+            --accent-light: #ffe4e6;
+            --radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
+            background-color: var(--bg);
+            color: var(--text);
             padding: 20px;
+            padding-top: calc(20px + env(safe-area-inset-top));
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
         }
 
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
+        .app-container {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
 
         header {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 5px;
         }
 
-        h1 { margin-bottom: 5px; color: #1a202c; }
-        p.subtitle { margin-top: 0; color: #718096; font-size: 0.95rem; }
-
-        .dashboard {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
+        header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -0.5px;
         }
 
-        @media (min-width: 850px) {
-            .dashboard { grid-template-columns: 380px 1fr; }
+        /* Mode Selector Tabs */
+        .mode-selector {
+            display: flex;
+            background: var(--secondary);
+            border: 3px solid var(--text);
+            border-radius: var(--radius);
+            padding: 4px;
+            gap: 4px;
+            box-shadow: 4px 4px 0px var(--text);
         }
 
-        .controls-card {
+        .tab-btn {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 10px 4px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #4b5563;
+            cursor: pointer;
+            border-radius: calc(var(--radius) - 12px);
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .tab-btn.active {
+            background: var(--text);
+            color: white;
+        }
+
+        .card {
             background: var(--card-bg);
-            padding: 22px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
+            border: 3px solid var(--text);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: 4px 4px 0px var(--text);
         }
 
-        .visualizer-card {
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .value-badge {
+            background: var(--text);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .stepper-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .btn-step {
+            width: 44px;
+            height: 44px;
+            border: 2px solid var(--text);
             background: var(--card-bg);
-            padding: 22px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            border-radius: 50%;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 2px 2px 0px var(--text);
         }
 
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
+        .btn-step:active {
+            transform: translate(1px, 1px);
+            box-shadow: 1px 1px 0px var(--text);
         }
-
-        label { font-weight: 600; font-size: 0.9rem; }
-        .elvanse-label { color: var(--elvanse-color); }
-        .amfexa-label { color: var(--amfexa-color); }
-        .ref-label { color: var(--ref-color); }
-        .sleep-label { color: var(--sleep-color); }
 
         input[type="range"] {
-            width: 100%;
+            flex-grow: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 10px;
+            border-radius: 5px;
+            background: var(--secondary);
+            outline: none;
+            border: 2px solid var(--text);
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: 2px solid var(--text);
             cursor: pointer;
         }
 
-        input[type="time"] {
-            padding: 8px;
-            border: 1px solid #cbd5e0;
-            border-radius: 6px;
-            font-size: 0.95rem;
-            width: 100%;
-            box-sizing: border-box;
+        /* Visualizer Box */
+        .visualizer {
+            height: 120px;
+            border: 3px solid var(--text);
+            border-radius: var(--radius);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            background: var(--secondary);
+            box-shadow: 4px 4px 0px var(--text);
         }
 
-        .value-display {
-            font-weight: bold;
-            font-size: 1.05rem;
-            margin-left: auto;
-        }
-
-        .flex-row {
+        .block-leave {
+            background: var(--accent-light);
+            color: var(--accent);
             display: flex;
             align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            transition: height 0.2s ease;
+            text-align: center;
+            border-bottom: 2px dashed var(--text);
+            overflow: hidden;
         }
 
-        .checkbox-group {
-            flex-direction: row;
+        .block-drink {
+            background: var(--primary-light);
+            color: var(--primary);
+            display: flex;
             align-items: center;
-            gap: 10px;
-            border-top: 1px solid #e2e8f0;
-            padding-top: 12px;
-            cursor: pointer;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 16px;
+            flex-grow: 1;
+            transition: height 0.2s ease;
+            text-align: center;
+            overflow: hidden;
         }
 
-        .checkbox-group input {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
+        /* Result Banner */
+        .result-card {
+            background: #caffbf;
+            border: 3px solid var(--text);
+            border-radius: var(--radius);
+            padding: 18px;
+            text-align: center;
+            box-shadow: 4px 4px 0px var(--text);
         }
 
-        .hidden-control {
-            display: none;
-            flex-direction: column;
-            gap: 18px;
-            border-left: 3px solid #e2e8f0;
-            padding-left: 12px;
+        .result-instruction {
+            font-size: 13px;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #4b5563;
+            margin-bottom: 4px;
         }
 
-        .hidden-control.active { display: flex; }
+        .result-main {
+            font-size: 30px;
+            font-weight: 900;
+            color: var(--text);
+        }
 
-        .info-panel {
-            margin-top: 10px;
-            padding: 12px;
-            background: #edf2f7;
-            border-radius: 8px;
-            font-size: 0.82rem;
-            line-height: 1.4;
-            color: #4a5568;
+        .timing-note {
+            font-size: 12px;
+            color: #6b7280;
+            text-align: center;
+            font-style: italic;
+            margin-top: -4px;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="app-container">
     <header>
-        <h1>ADHD Medication Sleep & Grid Visualizer</h1>
-        <p class="subtitle">Calibrated timeline mapping metabolic drop-off to clinical sleep compatibility windows</p>
+        <h1>Split Dose</h1>
     </header>
 
-    <div class="dashboard">
-        <!-- Controls Sidebar -->
-        <div class="controls-card">
-            <h3>Dosing Blueprint</h3>
-            
-            <!-- Timing Base -->
-            <div class="input-group">
-                <label style="color: #1a202c;">Morning Dose Awakening Time</label>
-                <input type="time" id="startTime" value="10:30">
-            </div>
+    <!-- Top Tab Navigation -->
+    <div class="mode-selector">
+        <button id="tab-elvanse" class="tab-btn active" onclick="switchMode('elvanse')">Elvanse</button>
+        <button id="tab-amfexa1" class="tab-btn" onclick="switchMode('amfexa1')">Amfexa 1</button>
+        <button id="tab-amfexa2" class="tab-btn" onclick="switchMode('amfexa2')">Amfexa 2</button>
+    </div>
 
-            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 5px 0;">
+    <!-- Visual Representation -->
+    <div class="visualizer">
+        <div id="blockLeave" class="block-leave">Leave 0ml</div>
+        <div id="blockDrink" class="block-drink">Drink 0ml</div>
+    </div>
 
-            <!-- Elvanse Core Profile -->
-            <div class="input-group">
-                <div class="flex-row">
-                    <label class="elvanse-label">Morning Elvanse Dose</label>
-                    <span id="elvanseDoseVal" class="value-display">45 mg</span>
-                </div>
-                <input type="range" id="elvanseDose" min="0" max="100" step="5" value="45">
-            </div>
+    <!-- Final Quick Answer -->
+    <div class="result-card">
+        <div id="resultLabel" class="result-instruction">Your Target</div>
+        <div id="finalOutput" class="result-main">Drink -- ml</div>
+    </div>
+    
+    <div id="timingNote" class="timing-note"></div>
 
-            <!-- Amfexa Configuration Toggle -->
-            <div class="input-group checkbox-group">
-                <input type="checkbox" id="useAmfexa" checked>
-                <label for="useAmfexa" class="amfexa-label">Include Amfexa Booster</label>
-            </div>
-
-            <div id="amfexaControls" class="hidden-control active">
-                <div class="input-group">
-                    <div class="flex-row">
-                        <label class="amfexa-label">Amfexa Booster Dose</label>
-                        <span id="amfexaDoseVal" class="value-display">5.0 mg</span>
-                    </div>
-                    <input type="range" id="amfexaDose" min="0" max="20" step="2.5" value="5">
-                </div>
-
-                <div class="input-group">
-                    <div class="flex-row">
-                        <label class="amfexa-label">Booster Delay</label>
-                        <span id="amfexaTimingVal" class="value-display">5.0h later</span>
-                    </div>
-                    <input type="range" id="amfexaDelay" min="1" max="16" step="0.5" value="5">
-                </div>
-            </div>
-
-            <!-- Equivalence Reference Toggle -->
-            <div class="input-group checkbox-group" style="border-top: 1px solid #e2e8f0; padding-top: 12px;">
-                <input type="checkbox" id="useRef" checked>
-                <label for="useRef" class="ref-label">Compare to Higher Elvanse Dose</label>
-            </div>
-
-            <div id="refControls" class="hidden-control active">
-                <div class="input-group">
-                    <div class="flex-row">
-                        <label class="ref-label">Reference Elvanse Strength</label>
-                        <span id="refDoseVal" class="value-display">60 mg</span>
-                    </div>
-                    <input type="range" id="refDose" min="20" max="100" step="5" value="60">
-                </div>
-            </div>
-
-            <!-- NEW: Sleep Line Calibration Slider -->
-            <div class="input-group" style="border-top: 1px solid #e2e8f0; padding-top: 12px;">
-                <div class="flex-row">
-                    <label class="sleep-label">Your Sleep Sensitivity Threshold</label>
-                    <span id="sleepThresholdVal" class="value-display">75% drop</span>
-                </div>
-                <input type="range" id="sleepThresholdSlider" min="40" max="90" step="5" value="75">
-            </div>
-
-            <div class="info-panel">
-                <strong>How to calibrate:</strong> If you know that a 10:30 AM Elvanse dose usually lets you sleep by midnight, adjust this sensitivity slider until the red line intersects your curve right at 12:00 AM. 
-            </div>
+    <!-- Pill Capacity -->
+    <div class="card control-group">
+        <div class="label-row">
+            <span>Pill Size</span>
+            <span id="pillVal" class="value-badge">70 mg</span>
         </div>
+        <div class="stepper-container">
+            <button class="btn-step" onclick="adjust('pill', -5)">-</button>
+            <input type="range" id="pillInput" min="5" max="100" step="5" value="70">
+            <button class="btn-step" onclick="adjust('pill', 5)">+</button>
+        </div>
+    </div>
 
-        <!-- Visual Analytics Box -->
-        <div class="visualizer-card">
-            <div style="position: relative; width:100%; height:100%; min-height: 480px;">
-                <canvas id="chartCanvas"></canvas>
-            </div>
+    <!-- Water Amount -->
+    <div class="card control-group">
+        <div class="label-row">
+            <span>Total Water</span>
+            <span id="waterVal" class="value-badge">30 ml</span>
+        </div>
+        <div class="stepper-container">
+            <button class="btn-step" onclick="adjust('water', -5)">-</button>
+            <input type="range" id="waterInput" min="5" max="100" step="5" value="30">
+            <button class="btn-step" onclick="adjust('water', 5)">+</button>
+        </div>
+    </div>
+
+    <!-- Target Dose -->
+    <div class="card control-group">
+        <div class="label-row">
+            <span>Target Dose</span>
+            <span id="targetVal" class="value-badge">45 mg</span>
+        </div>
+        <div class="stepper-container">
+            <button class="btn-step" onclick="adjust('target', -5)">-</button>
+            <input type="range" id="targetInput" min="2.5" max="100" step="2.5" value="45">
+            <button class="btn-step" onclick="adjust('target', 5)">+</button>
         </div>
     </div>
 </div>
 
 <script>
-    const elvanseKa = 0.65; const elvanseKe = 0.063;
-    const amfexaKa = 2.50;  const amfexaKe = 0.068;
+    // App State: Holds calculation values independently for each profile
+    let currentMode = 'elvanse';
+    const state = {
+        elvanse: { pill: 70, water: 30, target: 45 },
+        amfexa1: { pill: 20, water: 20, target: 10 },
+        amfexa2: { pill: 10, water: 20, target: 5 }
+    };
 
-    const startTimeInput = document.getElementById('startTime');
-    const elvanseSlider = document.getElementById('elvanseDose');
-    const elvanseDoseVal = document.getElementById('elvanseDoseVal');
-    const useAmfexaCheck = document.getElementById('useAmfexa');
-    const amfexaControls = document.getElementById('amfexaControls');
-    const amfexaSlider = document.getElementById('amfexaDose');
-    const amfexaDoseVal = document.getElementById('amfexaDoseVal');
-    const amfexaDelaySlider = document.getElementById('amfexaDelay');
-    const amfexaTimingVal = document.getElementById('amfexaTimingVal');
-    
-    const useRefCheck = document.getElementById('useRef');
-    const refControls = document.getElementById('refControls');
-    const refSlider = document.getElementById('refDose');
-    const refDoseVal = document.getElementById('refDoseVal');
+    const pillInput = document.getElementById('pillInput');
+    const waterInput = document.getElementById('waterInput');
+    const targetInput = document.getElementById('targetInput');
 
-    const sleepThresholdSlider = document.getElementById('sleepThresholdSlider');
-    const sleepThresholdVal = document.getElementById('sleepThresholdVal');
-    const ctx = document.getElementById('chartCanvas').getContext('2d');
+    const pillVal = document.getElementById('pillVal');
+    const waterVal = document.getElementById('waterVal');
+    const targetVal = document.getElementById('targetVal');
 
-    let simulationChart = null;
+    const blockLeave = document.getElementById('blockLeave');
+    const blockDrink = document.getElementById('blockDrink');
+    const finalOutput = document.getElementById('finalOutput');
+    const resultLabel = document.getElementById('resultLabel');
+    const timingNote = document.getElementById('timingNote');
 
-    function formatTo12HourClock(startStr, elapsedHours) {
-        const [startH, startM] = startStr.split(':').map(Number);
-        const baseMinutesFromMidnight = (startH * 60) + startM;
-        const totalMinutesElapsed = Math.round(elapsedHours * 60);
-        const targetMinutesAbsolute = baseMinutesFromMidnight + totalMinutesElapsed;
+    function switchMode(newMode) {
+        // Remove active class from old tab, add to new tab
+        document.getElementById(`tab-${currentMode}`).classList.remove('active');
+        document.getElementById(`tab-${newMode}`).classList.add('active');
 
-        const absoluteHours = Math.floor(targetMinutesAbsolute / 60);
-        const displayMinutes = Math.floor(targetMinutesAbsolute % 60).toString().padStart(2, '0');
+        // Save current UI inputs into the current mode's data state
+        state[currentMode].pill = parseInt(pillInput.value);
+        state[currentMode].water = parseInt(waterInput.value);
+        state[currentMode].target = parseFloat(targetInput.value);
+
+        // Update mode pointer
+        currentMode = newMode;
+
+        // Load targeted mode data into the UI elements
+        pillInput.value = state[currentMode].pill;
+        waterInput.value = state[currentMode].water;
         
-        const dayCounter = Math.floor(absoluteHours / 24);
-        const hour24Format = absoluteHours % 24;
-        
-        let hour12Format = hour24Format % 12;
-        if (hour12Format === 0) hour12Format = 12;
-        const periodMarker = hour24Format >= 12 ? 'PM' : 'AM';
-        
-        const daySuffix = dayCounter > 0 ? ' *' : '';
-        return `${hour12Format}:${displayMinutes} ${periodMarker}${daySuffix}`;
-    }
-
-    function calculateConcentration(payload, ka, ke, t) {
-        if (t <= 0) return 0;
-        return payload * (ka / (ka - ke)) * (Math.exp(-ke * t) - Math.exp(-ka * t));
-    }
-
-    function renderSimulation() {
-        const baseStartTime = startTimeInput.value || "10:30";
-        const elvanseDose = parseFloat(elvanseSlider.value);
-        const addAmfexa = useAmfexaCheck.checked;
-        const amfexaDose = parseFloat(amfexaSlider.value);
-        const amfexaDelay = parseFloat(amfexaDelaySlider.value);
-        const addRef = useRefCheck.checked;
-        const refDose = parseFloat(refSlider.value);
-        const dropPercent = parseFloat(sleepThresholdSlider.value);
-
-        elvanseDoseVal.textContent = `${elvanseDose} mg`;
-        amfexaDoseVal.textContent = `${amfexaDose.toFixed(1)} mg`;
-        amfexaTimingVal.textContent = `${amfexaDelay.toFixed(1)}h later`;
-        refDoseVal.textContent = `${refDose} mg`;
-        sleepThresholdVal.textContent = `${dropPercent}% drop`;
-
-        amfexaControls.style.display = addAmfexa ? 'flex' : 'none';
-        refControls.style.display = addRef ? 'flex' : 'none';
-
-        const rawLabels = [];
-        const xTicksDisplay = [];
-        const elvanseData = [];
-        const amfexaData = [];
-        const totalData = [];
-        const referenceData = [];
-
-        // Find peak to dynamically drop from
-        let maxMorningElvanseConc = 0;
-        const activeElvanseBase = elvanseDose * 0.297;
-        
-        for (let hour = 0; hour <= 30; hour += 0.5) {
-            const concElvanse = calculateConcentration(activeElvanseBase, elvanseKa, elvanseKe, hour);
-            if (concElvanse > maxMorningElvanseConc) {
-                maxMorningElvanseConc = concElvanse;
-            }
+        // Adjust slider granular steps based on medication type
+        if (currentMode.startsWith('amfexa')) {
+            targetInput.step = "2.5"; // Amfexa often requires micro-fraction increments
+        } else {
+            targetInput.step = "5";
         }
 
-        // Calculate the custom threshold based on user slider input
-        const dynamicSleepThreshold = maxMorningElvanseConc * (1 - (dropPercent / 100));
-        const sleepThresholdLineData = [];
+        targetInput.value = state[currentMode].target;
 
-        for (let hour = 0; hour <= 30; hour += 0.5) {
-            const clockString = formatTo12HourClock(baseStartTime, hour);
-            rawLabels.push(clockString); 
-            xTicksDisplay.push(`+${hour}h (${clockString.replace(' *', '*')})`);
-
-            const concElvanse = calculateConcentration(activeElvanseBase, elvanseKa, elvanseKe, hour);
-
-            let concAmfexa = 0;
-            if (addAmfexa) {
-                const tAmfexa = hour - amfexaDelay;
-                const activeAmfexaBase = amfexaDose * 0.730;
-                concAmfexa = calculateConcentration(activeAmfexaBase, amfexaKa, amfexaKe, tAmfexa);
-            }
-
-            let concRef = 0;
-            if (addRef) {
-                const activeRefBase = refDose * 0.297;
-                concRef = calculateConcentration(activeRefBase, elvanseKa, elvanseKe, hour);
-            }
-
-            elvanseData.push(concElvanse);
-            amfexaData.push(concAmfexa);
-            totalData.push(concElvanse + concAmfexa);
-            referenceData.push(concRef);
-            sleepThresholdLineData.push(dynamicSleepThreshold);
-        }
-
-        if (simulationChart) { simulationChart.destroy(); }
-
-        simulationChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: rawLabels, 
-                datasets: [
-                    {
-                        label: 'Your Strategy (Total Profile)',
-                        data: totalData,
-                        borderColor: '#805ad5',
-                        backgroundColor: 'rgba(128, 90, 213, 0.05)',
-                        fill: true,
-                        borderWidth: 3,
-                        pointRadius: 0,
-                        tension: 0.2
-                    },
-                    {
-                        label: 'Sleep Threshold Indicator',
-                        data: sleepThresholdLineData,
-                        borderColor: '#e53e3e',
-                        borderWidth: 1.5,
-                        borderDash: [6, 4],
-                        fill: false,
-                        pointRadius: 0,
-                        tension: 0
-                    },
-                    {
-                        label: 'Elvanse Component',
-                        data: elvanseData,
-                        borderColor: '#3182ce',
-                        borderDash: [4, 4],
-                        fill: false,
-                        borderWidth: 1.5,
-                        pointRadius: 0,
-                        tension: 0.2
-                    },
-                    {
-                        label: 'Amfexa Component',
-                        data: amfexaData,
-                        borderColor: '#dd6b20',
-                        borderDash: [4, 4],
-                        fill: false,
-                        borderWidth: 1.5,
-                        pointRadius: 0,
-                        tension: 0.2
-                    },
-                    {
-                        label: `Reference Single Elvanse (${refDose}mg)`,
-                        data: referenceData,
-                        borderColor: '#718096',
-                        borderDash: [2, 2],
-                        fill: false,
-                        borderWidth: 2,
-                        pointRadius: 0,
-                        hidden: !addRef,
-                        tension: 0.2
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {
-                    mode: 'index',
-                    intersect: false
-                },
-                scales: {
-                    x: {
-                        grid: { 
-                            display: true,
-                            color: function(context) {
-                                return context.index % 2 === 0 ? 'rgba(0, 0, 0, 0.08)' : 'rgba(0, 0, 0, 0.02)';
-                            }
-                        },
-                        title: { display: true, text: 'Time Line View (* represents next day sequence)' },
-                        ticks: {
-                            callback: function(val, index) {
-                                return index % 4 === 0 ? xTicksDisplay[index].split(' (')[0] + '\n' + xTicksDisplay[index].split(' (')[1].replace(')', '') : '';
-                            }
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: 'rgba(0,0,0,0.04)' },
-                        title: { display: true, text: 'Active Payload Concentration (mg base equivalents)' }
-                    }
-                },
-                plugins: {
-                    tooltip: {
-                        padding: 12,
-                        callbacks: {
-                            title: function(context) {
-                                const idx = context[0].dataIndex;
-                                return `Time: ${rawLabels[idx].replace(' *', ' (Next Day)')} (+${idx * 0.5}h elapsed)`;
-                            },
-                            label: function(context) {
-                                if (context.dataset.label === 'Sleep Threshold Indicator') {
-                                    return ` ${context.dataset.label}: Target < ${context.parsed.y.toFixed(2)} mg`;
-                                }
-                                return ` ${context.dataset.label}: ${context.parsed.y.toFixed(2)} mg base`;
-                            }
-                        }
-                    }
-                }
-            }
-        });
+        // Refresh calculations
+        calculate();
     }
 
-    [startTimeInput, elvanseSlider, useAmfexaCheck, amfexaSlider, amfexaDelaySlider, useRefCheck, refSlider, sleepThresholdSlider].forEach(element => {
-        element.addEventListener('input', renderSimulation);
+    function adjust(type, amount) {
+        const input = document.getElementById(`${type}Input`);
+        input.value = parseFloat(input.value) + amount;
+        calculate();
+    }
+
+    function calculate() {
+        let pill = parseInt(pillInput.value);
+        let water = parseInt(waterInput.value);
+        let target = parseFloat(targetInput.value);
+
+        // Boundary constraint check
+        if (target > pill) {
+            target = pill;
+            targetInput.value = pill;
+        }
+        targetInput.max = pill;
+
+        // Label layout updates based on context
+        if (currentMode === 'elvanse') {
+            resultLabel.innerText = "Morning Elvanse Target";
+            timingNote.innerText = "Take once daily in the morning";
+        } else if (currentMode === 'amfexa1') {
+            resultLabel.innerText = "Amfexa Booster — Dose 1";
+            timingNote.innerText = "Space doses 4 to 6 hours apart";
+        } else {
+            resultLabel.innerText = "Amfexa Booster — Dose 2";
+            timingNote.innerText = "Avoid taking too late to safeguard sleep";
+        }
+
+        pillVal.innerText = `${pill} mg`;
+        waterVal.innerText = `${water} ml (or grams)`;
+        targetVal.innerText = `${target} mg`;
+
+        // Mathematical conversion ratio logic
+        const drinkAmount = (target / pill) * water;
+        const leaveAmount = water - drinkAmount;
+
+        const drinkFormatted = parseFloat(drinkAmount.toFixed(1));
+        const leaveFormatted = parseFloat(leaveAmount.toFixed(1));
+
+        finalOutput.innerText = `Drink ${drinkFormatted} ml`;
+
+        // Style rendering mapping
+        const leavePercent = (leaveAmount / water) * 100;
+        if (leavePercent <= 0) {
+            blockLeave.style.height = '0%';
+            blockLeave.innerText = '';
+        } else {
+            blockLeave.style.height = `${leavePercent}%`;
+            blockLeave.innerText = `Discard / Save: ${leaveFormatted} ml`;
+        }
+
+        blockDrink.innerText = `Drink: ${drinkFormatted} ml`;
+    }
+
+    // Connect standard action triggers
+    [pillInput, waterInput, targetInput].forEach(input => {
+        input.addEventListener('input', calculate);
     });
 
-    renderSimulation();
+    // Run baseline initial pass
+    calculate();
 </script>
 
 </body>
