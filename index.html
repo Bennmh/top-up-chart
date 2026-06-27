@@ -11,15 +11,15 @@
             --bg-color: #f8fafc;
             --card-bg: #ffffff;
             --text-color: #2d3748;
-            --border-color: #d1d5db; 
+            --border-color: #d1d5db; /* Thinner, lighter line weight */
             
-            /* Enhanced high-vibrancy color mapping */
-            --elvanse-theme: #3b82f6;      /* Illuminated, bright vivid blue */
-            --elvanse-ref: #60a5fa;        /* Light sky blue variant for reference */
-            --amfexa-morning: #ff7a00;     /* Lighter, punched-up vibrant orange */
-            --amfexa-booster: #d946ef;     /* Lighter, radiant electric pinky-purple / fuchsia */
-            --total-theme: #7c3aed;        /* Solid rich violet core */
-            --sleep-theme: #f43f5e;        /* Clean saturated rose pink-red */
+            /* High saturation color mapping */
+            --elvanse-theme: #3b82f6;      /* Strong royal blue, slightly less dark */
+            --elvanse-ref: #93c5fd;        /* Lighter desaturated blue for comparison track */
+            --amfexa-morning: #fb923c;     /* Lighter and more vibrant saturated warm orange */
+            --amfexa-booster: #d946ef;     /* Lighter and vibrant pinky purple / fuchsia */
+            --total-theme: #6d28d9;        /* Rich solid violet */
+            --sleep-theme: #ef4444;        /* Saturated red */
             --ref-theme: #64748b;
         }
 
@@ -63,6 +63,7 @@
             gap: 12px;
         }
 
+        /* Thinner, cleaner structural layout blocks */
         .input-box {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -72,7 +73,7 @@
 
         .box-base { background: #ffffff; }
         
-        /* Linked View Options Container block with flat internal corners */
+        /* Linked View Options Container block */
         .view-options-group {
             margin-top: 8px;
             border: 1px solid var(--border-color);
@@ -81,22 +82,13 @@
             padding: 3px;
             display: flex;
             flex-direction: column;
-            gap: 0px; /* Seamless joining */
+            gap: 3px;
         }
 
         .view-options-group .input-box {
             border: none;
             background: var(--card-bg);
-        }
-
-        /* Squared joining boundaries for inner modules */
-        .view-options-group .input-box:first-child {
-            border-radius: 9px 9px 0 0;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .view-options-group .input-box:last-child {
-            border-radius: 0 0 9px 9px;
+            border-radius: 9px;
         }
 
         .box-title {
@@ -122,6 +114,7 @@
             display: inline-block;
         }
 
+        /* High Contrast Segmented Selectors */
         .segmented-control {
             display: flex;
             background: #cbd5e1;
@@ -168,10 +161,12 @@
             margin: 4px 0;
         }
 
+        /* Distinct color tracks assigned to sliders */
         #boosterDose, #boosterDelay { accent-color: var(--amfexa-booster); }
         #sleepThresholdSlider { accent-color: var(--sleep-theme); }
         #refDose { accent-color: var(--elvanse-ref); }
 
+        /* Step Adjuster Tools */
         .time-stepper-container {
             display: flex;
             gap: 6px;
@@ -235,9 +230,17 @@
             padding: 16px;
             border-radius: 12px;
             border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.01);
             height: 100%;
             min-height: 580px;
             box-sizing: border-box;
+        }
+
+        .info-pane {
+            font-size: 0.78rem;
+            line-height: 1.35;
+            color: #64748b;
+            margin-top: 4px;
         }
     </style>
 </head>
@@ -320,10 +323,10 @@
                 </div>
             </div>
 
-            <!-- Integrated View Settings Module Layout -->
+            <!-- Attached Secondary Configuration Block Group -->
             <div class="view-options-group">
-                <!-- Sleep Threshold Layer Panel -->
-                <div class="input-box">
+                <!-- Sleep Threshold Line Config -->
+                <div class="input-box" style="border-radius: 9px 9px 0 0;">
                     <div class="box-title">
                         <div class="title-left-group">
                             <span class="title-dot" style="background-color: var(--sleep-theme);"></span>
@@ -333,14 +336,14 @@
                     <div class="input-group">
                         <div class="flex-header-row">
                             <label class="field-label">Required drop in levels for sleep</label>
-                            <span id="sleepThresholdVal" class="value-display">75% drop</span>
+                            <span id="sleepThresholdVal" class="value-display">55% drop</span>
                         </div>
-                        <input type="range" id="sleepThresholdSlider" min="40" max="95" step="5" value="75">
+                        <input type="range" id="sleepThresholdSlider" min="40" max="95" step="5" value="55">
                     </div>
                 </div>
 
-                <!-- Reference Platform Panel -->
-                <div class="input-box">
+                <!-- Comparison Space -->
+                <div class="input-box" style="border-top: 1px solid #e2e8f0; border-radius: 0 0 9px 9px;">
                     <div class="box-title">
                         <div class="title-left-group">
                             <span class="title-dot" style="background-color: var(--elvanse-ref);"></span>
@@ -380,7 +383,7 @@
         amfexa:  { ka: 2.50, ke: 0.068, bio: 0.730 }  
     };
 
-    // UI elements binding
+    // DOM References
     const startTimeInput = document.getElementById('startTime');
     const stepDownBtn = document.getElementById('stepDown');
     const stepUpBtn = document.getElementById('stepUp');
@@ -440,13 +443,13 @@
             boosterDelaySlider.value = state.boosterDelay;
             useRefCheck.checked = state.useRef;
             refSlider.value = state.refDose;
-            sleepThresholdSlider.value = state.sleepThreshold;
+            sleepThresholdSlider.value = state.sleepThreshold || "55";
         } catch (e) {
-            console.error("Local context loading bypassed", e);
+            console.error("Cache system bypass failed", e);
         }
     }
 
-    // Dynamic state management for active card parameters
+    // Dynamic color & background shifts for Slot 1 matching selections
     function adjustMorningSliderLimits(type, resetValue = true) {
         if (type === 'elvanse') {
             morningDoseSlider.min = "20"; morningDoseSlider.max = "100"; morningDoseSlider.step = "5";
@@ -459,7 +462,7 @@
             if (resetValue) morningDoseSlider.value = "5";
             morningDot.style.backgroundColor = "var(--amfexa-morning)";
             morningDoseSlider.style.accentColor = "var(--amfexa-morning)";
-            morningCard.style.backgroundColor = "rgba(255, 122, 0, 0.02)";
+            morningCard.style.backgroundColor = "rgba(251, 146, 60, 0.02)";
         }
     }
 
@@ -502,40 +505,40 @@
         return payload * (ka / (ka - ke)) * (Math.exp(-ke * t) - Math.exp(-ka * t));
     }
 
-    // Precise timeline overlays avoiding boundary cutting
+    // Customized Timeline enhancements: draws "now" marker and distinct Midnight boundary lines
     const timelineEnhancementsPlugin = {
         id: 'timelineEnhancements',
         afterDraw: (chart) => {
             const xAxis = chart.scales.x;
-            const chartArea = chart.chartArea;
-            if (!xAxis || !chartArea) return;
+            const yAxis = chart.scales.y;
+            if (!xAxis || !yAxis) return;
             const ctx = chart.ctx;
 
             const baseTimeStr = startTimeInput.value || "10:30";
             const [sh, sm] = baseTimeStr.split(':').map(Number);
             
-            // Clean midnight grid boundary line
+            // Draw Day Boundary (Midnight Line) if it falls within scope
             for (let hour = 0; hour <= 30; hour += 0.5) {
                 const absoluteMins = (sh * 60) + sm + Math.round(hour * 60);
                 if (absoluteMins % 1440 === 0 && hour > 0) {
                     const xLine = xAxis.getPixelForValue(hour * 2);
                     ctx.save();
                     ctx.beginPath();
-                    ctx.moveTo(xLine, chartArea.top);
-                    ctx.lineTo(xLine, chartArea.bottom);
-                    ctx.strokeStyle = '#475569';
-                    ctx.lineWidth = 1.1; 
+                    ctx.moveTo(xLine, yAxis.top);
+                    ctx.lineTo(xLine, yAxis.bottom);
+                    ctx.strokeStyle = '#64748b';
+                    ctx.lineWidth = 1.2;
                     ctx.stroke();
 
-                    ctx.fillStyle = '#475569';
-                    ctx.font = '700 10px -apple-system, BlinkMacSystemFont, sans-serif';
+                    ctx.fillStyle = '#64748b';
+                    ctx.font = '600 10px sans-serif';
                     ctx.textAlign = 'left';
-                    ctx.fillText(' Midnight', xLine + 5, chartArea.top + 14);
+                    ctx.fillText(' Midnight', xLine + 4, yAxis.top + 14);
                     ctx.restore();
                 }
             }
 
-            // Realtime position indicator line
+            // Live Time Indicator
             const now = new Date();
             const elapsedMins = (now.getHours() * 60 + now.getMinutes()) - (sh * 60 + sm);
             let absoluteElapsed = elapsedMins >= 0 ? elapsedMins / 60 : (elapsedMins + 1440) / 60;
@@ -544,10 +547,10 @@
                 const xPixel = xAxis.getPixelForValue(absoluteElapsed * 2); 
                 ctx.save();
                 ctx.beginPath();
-                ctx.moveTo(xPixel, chartArea.top);
-                ctx.lineTo(xPixel, chartArea.bottom);
+                ctx.moveTo(xPixel, yAxis.top);
+                ctx.lineTo(xPixel, yAxis.bottom);
                 ctx.strokeStyle = '#0d9488';
-                ctx.lineWidth = 1.2;
+                ctx.lineWidth = 1.5;
                 ctx.setLineDash([3, 3]);
                 ctx.stroke();
 
@@ -560,7 +563,7 @@
                 ctx.fillStyle = '#0d9488';
                 ctx.font = '500 11px sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText(formattedNowString, xPixel, chartArea.top - 6);
+                ctx.fillText(formattedNowString, xPixel, yAxis.top - 6);
                 ctx.restore();
             }
         }
@@ -577,7 +580,7 @@
         const refDose = parseFloat(refSlider.value);
         const dropPercent = parseFloat(sleepThresholdSlider.value);
 
-        // Control synchronizations
+        // Synchronize numeric readouts
         morningDoseVal.textContent = `${morningDose} mg`;
         boosterDoseVal.textContent = `${boosterDose.toFixed(2)} mg`;
         boosterDelayVal.textContent = `${boosterDelay.toFixed(1)}h later`;
@@ -624,7 +627,7 @@
             sleepLineData.push(dynamicThresholdValue);
         }
 
-        // Resolves line rendering issues by cleanly mapping parameters directly inside active instances
+        // Direct data updates without rebuilding instances eliminates choppy rendering animations
         if (simulationChart) {
             simulationChart.data.labels = rawLabels;
             simulationChart.data.datasets[0].data = totalData;
@@ -652,7 +655,7 @@
                         label: 'Active System Profile',
                         data: totalData,
                         borderColor: 'var(--total-theme)',
-                        backgroundColor: 'rgba(124, 92, 237, 0.05)', /* Re-established highly visible area tint fill */
+                        backgroundColor: 'rgba(109, 40, 217, 0.01)',
                         fill: true,
                         borderWidth: 2.5,
                         pointRadius: 0,
@@ -663,7 +666,7 @@
                         data: sleepLineData,
                         borderColor: 'var(--sleep-theme)',
                         borderWidth: 1.2,
-                        borderDash: [6, 4], 
+                        borderDash: [10, 4], /* Alternating long dash pattern */
                         fill: false,
                         pointRadius: 0
                     },
@@ -690,7 +693,7 @@
                         label: `Comparison Track (${refDose}mg Elvanse)`,
                         data: referenceData,
                         borderColor: 'var(--elvanse-ref)',
-                        borderDash: [15, 8], /* Relaxed layout using fewer dashes across the timeline */
+                        borderDash: [8, 6], /* Fewer dashes configuration */
                         borderWidth: 1.5,
                         fill: false,
                         pointRadius: 0,
@@ -708,29 +711,30 @@
                         grid: {
                             display: true,
                             color: function(context) {
-                                // Renders crisp layout lines every single hour (even indices) with optimized opacity
-                                if (context.index % 2 === 0) return 'rgba(0, 0, 0, 0.16)'; 
-                                return 'transparent'; 
+                                if (context.index % 2 === 0) return 'rgba(0, 0, 0, 0.15)'; 
+                                return 'rgba(0, 0, 0, 0.03)'; 
                             },
-                            lineWidth: 1
+                            lineWidth: function(context) {
+                                return context.index % 2 === 0 ? 1.2 : 1;
+                            }
                         },
                         ticks: {
                             maxRotation: 0,
                             autoSkip: false,
                             callback: function(val, index) {
-                                // Keeps label output anchored explicitly to 2-hour increments
                                 if (index % 4 === 0) {
                                     const tObj = tickDataStore[index];
-                                    return tObj.clock;
+                                    return [tObj.clock, tObj.elapsed];
                                 }
                                 return null;
                             },
                             font: function(context) {
-                                const idx = context.index;
-                                // Forces bold weight profile for original baseline point and midnight steps
-                                if (idx === 0) return { weight: '700', size: 10 };
-                                if (tickDataStore[idx]) {
-                                    if (tickDataStore[idx].clock.startsWith('12:00am')) {
+                                if (context.index === 0) {
+                                    return { weight: '700', size: 10 };
+                                }
+                                if (tickDataStore && tickDataStore[context.index]) {
+                                    const tObj = tickDataStore[context.index];
+                                    if (tObj.totalMinutesAbsolute % 1440 === 0) {
                                         return { weight: '700', size: 10 };
                                     }
                                 }
@@ -740,18 +744,28 @@
                     },
                     y: {
                         beginAtZero: true,
-                        grid: { color: 'rgba(0,0,0,0.03)' },
+                        grid: { color: 'rgba(0,0,0,0.02)' },
                         title: { display: true, text: 'Active Concentration (mg base equivalents)', font: { size: 11, weight: '600' } }
                     }
                 },
                 plugins: {
                     tooltip: {
                         padding: 10,
-                        caretPadding: 16, /* Comfortable spacing offset from pointer line elements */
+                        caretPadding: 16, /* Safely offsets box window further away from mouse pointers and node circles */
                         callbacks: {
                             title: function(context) {
                                 const idx = context[0].dataIndex;
-                                return `Time window: ${rawLabels[idx].replace('*', ' (next day)')} (+${idx * 0.5}h tracking)`;
+                                return `Time window: ${rawLabels[idx].replace('*', ' (next day)')} (${tickDataStore[idx].elapsed})`;
+                            },
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.parsed.y.toFixed(2) + ' mg';
+                                }
+                                return label;
                             }
                         }
                     }
@@ -760,19 +774,7 @@
         });
     }
 
-    // Input Trigger Registry
-    const triggerElements = [
-        startTimeInput, morningDoseSlider, useBoosterCheck, 
-        boosterDoseSlider, boosterDelaySlider, useRefCheck, refSlider, sleepThresholdSlider
-    ];
-
-    triggerElements.forEach(element => {
-        element.addEventListener('input', () => {
-            renderSimulation();
-            saveState();
-        });
-    });
-
+    // Event Listeners initialization and initial rendering
     document.querySelectorAll('input[name="morningType"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
             adjustMorningSliderLimits(e.target.value, true);
@@ -781,17 +783,35 @@
         });
     });
 
+    [morningDoseSlider, boosterDoseSlider, boosterDelaySlider, sleepThresholdSlider, refSlider].forEach(slider => {
+        slider.addEventListener('input', () => {
+            renderSimulation();
+            saveState();
+        });
+    });
+
+    [useBoosterCheck, useRefCheck].forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            renderSimulation();
+            saveState();
+        });
+    });
+
+    startTimeInput.addEventListener('change', () => {
+        renderSimulation();
+        saveState();
+    });
+
     stepDownBtn.addEventListener('click', () => handleTimeStep(-15));
     stepUpBtn.addEventListener('click', () => handleTimeStep(15));
 
-    // Run Initialization Sequence
-    loadState();
-    renderSimulation();
-
-    setInterval(() => {
-        if (simulationChart) { simulationChart.draw(); }
-    }, 60000);
+    // Initial Execution
+    window.addEventListener('DOMContentLoaded', () => {
+        loadState();
+        const activeType = document.querySelector('input[name="morningType"]:checked').value;
+        adjustMorningSliderLimits(activeType, false);
+        renderSimulation();
+    });
 </script>
-
 </body>
 </html>
