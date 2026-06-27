@@ -11,15 +11,15 @@
             --bg-color: #f8fafc;
             --card-bg: #ffffff;
             --text-color: #2d3748;
-            --border-color: #d1d5db; /* Thinner, lighter line weight */
+            --border-color: #d1d5db; 
             
-            /* High saturation color mapping */
-            --elvanse-theme: #2563eb;      /* Deep royal blue */
-            --elvanse-ref: #93c5fd;        /* Lighter desaturated blue for comparison track */
-            --amfexa-morning: #f97316;     /* Saturated warm orange */
-            --amfexa-booster: #db2777;     /* Distinct pinky-coral / deep rose */
-            --total-theme: #6d28d9;        /* Rich solid violet */
-            --sleep-theme: #ef4444;        /* Saturated red */
+            /* Enhanced high-vibrancy color mapping */
+            --elvanse-theme: #3b82f6;      /* Illuminated, bright vivid blue */
+            --elvanse-ref: #60a5fa;        /* Light sky blue variant for reference */
+            --amfexa-morning: #ff7a00;     /* Lighter, punched-up vibrant orange */
+            --amfexa-booster: #d946ef;     /* Lighter, radiant electric pinky-purple / fuchsia */
+            --total-theme: #7c3aed;        /* Solid rich violet core */
+            --sleep-theme: #f43f5e;        /* Clean saturated rose pink-red */
             --ref-theme: #64748b;
         }
 
@@ -63,7 +63,6 @@
             gap: 12px;
         }
 
-        /* Thinner, cleaner structural layout blocks */
         .input-box {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -73,7 +72,7 @@
 
         .box-base { background: #ffffff; }
         
-        /* Linked View Options Container block */
+        /* Linked View Options Container block with flat internal corners */
         .view-options-group {
             margin-top: 8px;
             border: 1px solid var(--border-color);
@@ -82,13 +81,22 @@
             padding: 3px;
             display: flex;
             flex-direction: column;
-            gap: 3px;
+            gap: 0px; /* Seamless joining */
         }
 
         .view-options-group .input-box {
             border: none;
             background: var(--card-bg);
-            border-radius: 9px;
+        }
+
+        /* Squared joining boundaries for inner modules */
+        .view-options-group .input-box:first-child {
+            border-radius: 9px 9px 0 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .view-options-group .input-box:last-child {
+            border-radius: 0 0 9px 9px;
         }
 
         .box-title {
@@ -114,7 +122,6 @@
             display: inline-block;
         }
 
-        /* High Contrast Segmented Selectors */
         .segmented-control {
             display: flex;
             background: #cbd5e1;
@@ -161,12 +168,10 @@
             margin: 4px 0;
         }
 
-        /* Distinct color tracks assigned to sliders */
         #boosterDose, #boosterDelay { accent-color: var(--amfexa-booster); }
         #sleepThresholdSlider { accent-color: var(--sleep-theme); }
         #refDose { accent-color: var(--elvanse-ref); }
 
-        /* Step Adjuster Tools */
         .time-stepper-container {
             display: flex;
             gap: 6px;
@@ -230,17 +235,9 @@
             padding: 16px;
             border-radius: 12px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.01);
             height: 100%;
             min-height: 580px;
             box-sizing: border-box;
-        }
-
-        .info-pane {
-            font-size: 0.78rem;
-            line-height: 1.35;
-            color: #64748b;
-            margin-top: 4px;
         }
     </style>
 </head>
@@ -293,7 +290,7 @@
             </div>
 
             <!-- Slot 2: Afternoon Booster Track -->
-            <div class="input-box" style="background: rgba(219, 39, 119, 0.01);">
+            <div class="input-box" style="background: rgba(217, 70, 239, 0.01);">
                 <div class="box-title">
                     <div class="title-left-group">
                         <span class="title-dot" style="background-color: var(--amfexa-booster);"></span>
@@ -323,9 +320,9 @@
                 </div>
             </div>
 
-            <!-- Attached Secondary Configuration Block Group -->
+            <!-- Integrated View Settings Module Layout -->
             <div class="view-options-group">
-                <!-- Sleep Threshold Line Config -->
+                <!-- Sleep Threshold Layer Panel -->
                 <div class="input-box">
                     <div class="box-title">
                         <div class="title-left-group">
@@ -342,8 +339,8 @@
                     </div>
                 </div>
 
-                <!-- Comparison Space -->
-                <div class="input-box" style="border-top: 1px solid #e2e8f0; border-radius: 0 0 9px 9px;">
+                <!-- Reference Platform Panel -->
+                <div class="input-box">
                     <div class="box-title">
                         <div class="title-left-group">
                             <span class="title-dot" style="background-color: var(--elvanse-ref);"></span>
@@ -383,7 +380,7 @@
         amfexa:  { ka: 2.50, ke: 0.068, bio: 0.730 }  
     };
 
-    // DOM References
+    // UI elements binding
     const startTimeInput = document.getElementById('startTime');
     const stepDownBtn = document.getElementById('stepDown');
     const stepUpBtn = document.getElementById('stepUp');
@@ -445,24 +442,24 @@
             refSlider.value = state.refDose;
             sleepThresholdSlider.value = state.sleepThreshold;
         } catch (e) {
-            console.error("Cache system bypass failed", e);
+            console.error("Local context loading bypassed", e);
         }
     }
 
-    // Dynamic color & background shifts for Slot 1 matching selections
+    // Dynamic state management for active card parameters
     function adjustMorningSliderLimits(type, resetValue = true) {
         if (type === 'elvanse') {
             morningDoseSlider.min = "20"; morningDoseSlider.max = "100"; morningDoseSlider.step = "5";
             if (resetValue) morningDoseSlider.value = "45";
             morningDot.style.backgroundColor = "var(--elvanse-theme)";
             morningDoseSlider.style.accentColor = "var(--elvanse-theme)";
-            morningCard.style.backgroundColor = "rgba(37, 99, 235, 0.02)";
+            morningCard.style.backgroundColor = "rgba(59, 130, 246, 0.02)";
         } else {
             morningDoseSlider.min = "1.25"; morningDoseSlider.max = "20"; morningDoseSlider.step = "1.25";
             if (resetValue) morningDoseSlider.value = "5";
             morningDot.style.backgroundColor = "var(--amfexa-morning)";
             morningDoseSlider.style.accentColor = "var(--amfexa-morning)";
-            morningCard.style.backgroundColor = "rgba(249, 115, 22, 0.02)";
+            morningCard.style.backgroundColor = "rgba(255, 122, 0, 0.02)";
         }
     }
 
@@ -505,40 +502,40 @@
         return payload * (ka / (ka - ke)) * (Math.exp(-ke * t) - Math.exp(-ka * t));
     }
 
-    // Customized Timeline enhancements: draws "now" marker and distinct Midnight boundary lines
+    // Precise timeline overlays avoiding boundary cutting
     const timelineEnhancementsPlugin = {
         id: 'timelineEnhancements',
         afterDraw: (chart) => {
             const xAxis = chart.scales.x;
-            const yAxis = chart.scales.y;
-            if (!xAxis || !yAxis) return;
+            const chartArea = chart.chartArea;
+            if (!xAxis || !chartArea) return;
             const ctx = chart.ctx;
 
             const baseTimeStr = startTimeInput.value || "10:30";
             const [sh, sm] = baseTimeStr.split(':').map(Number);
             
-            // Draw Day Boundary (Midnight Line) if it falls within scope
+            // Clean midnight grid boundary line
             for (let hour = 0; hour <= 30; hour += 0.5) {
                 const absoluteMins = (sh * 60) + sm + Math.round(hour * 60);
                 if (absoluteMins % 1440 === 0 && hour > 0) {
                     const xLine = xAxis.getPixelForValue(hour * 2);
                     ctx.save();
                     ctx.beginPath();
-                    ctx.moveTo(xLine, yAxis.top);
-                    ctx.lineTo(xLine, yAxis.bottom);
+                    ctx.moveTo(xLine, chartArea.top);
+                    ctx.lineTo(xLine, chartArea.bottom);
                     ctx.strokeStyle = '#475569';
-                    ctx.lineWidth = 1.5;
+                    ctx.lineWidth = 1.1; 
                     ctx.stroke();
 
                     ctx.fillStyle = '#475569';
-                    ctx.font = '600 10px sans-serif';
+                    ctx.font = '700 10px -apple-system, BlinkMacSystemFont, sans-serif';
                     ctx.textAlign = 'left';
-                    ctx.fillText(' Midnight (new day)', xLine + 4, yAxis.top + 14);
+                    ctx.fillText(' Midnight', xLine + 5, chartArea.top + 14);
                     ctx.restore();
                 }
             }
 
-            // Live Time Indicator
+            // Realtime position indicator line
             const now = new Date();
             const elapsedMins = (now.getHours() * 60 + now.getMinutes()) - (sh * 60 + sm);
             let absoluteElapsed = elapsedMins >= 0 ? elapsedMins / 60 : (elapsedMins + 1440) / 60;
@@ -547,10 +544,10 @@
                 const xPixel = xAxis.getPixelForValue(absoluteElapsed * 2); 
                 ctx.save();
                 ctx.beginPath();
-                ctx.moveTo(xPixel, yAxis.top);
-                ctx.lineTo(xPixel, yAxis.bottom);
+                ctx.moveTo(xPixel, chartArea.top);
+                ctx.lineTo(xPixel, chartArea.bottom);
                 ctx.strokeStyle = '#0d9488';
-                ctx.lineWidth = 1.5;
+                ctx.lineWidth = 1.2;
                 ctx.setLineDash([3, 3]);
                 ctx.stroke();
 
@@ -563,7 +560,7 @@
                 ctx.fillStyle = '#0d9488';
                 ctx.font = '500 11px sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText(formattedNowString, xPixel, yAxis.top - 6);
+                ctx.fillText(formattedNowString, xPixel, chartArea.top - 6);
                 ctx.restore();
             }
         }
@@ -580,7 +577,7 @@
         const refDose = parseFloat(refSlider.value);
         const dropPercent = parseFloat(sleepThresholdSlider.value);
 
-        // Synchronize numeric readouts
+        // Control synchronizations
         morningDoseVal.textContent = `${morningDose} mg`;
         boosterDoseVal.textContent = `${boosterDose.toFixed(2)} mg`;
         boosterDelayVal.textContent = `${boosterDelay.toFixed(1)}h later`;
@@ -627,7 +624,7 @@
             sleepLineData.push(dynamicThresholdValue);
         }
 
-        // Direct data updates without rebuilding instances eliminates choppy rendering animations
+        // Resolves line rendering issues by cleanly mapping parameters directly inside active instances
         if (simulationChart) {
             simulationChart.data.labels = rawLabels;
             simulationChart.data.datasets[0].data = totalData;
@@ -655,7 +652,7 @@
                         label: 'Active System Profile',
                         data: totalData,
                         borderColor: 'var(--total-theme)',
-                        backgroundColor: 'rgba(109, 40, 217, 0.01)',
+                        backgroundColor: 'rgba(124, 92, 237, 0.05)', /* Re-established highly visible area tint fill */
                         fill: true,
                         borderWidth: 2.5,
                         pointRadius: 0,
@@ -666,7 +663,7 @@
                         data: sleepLineData,
                         borderColor: 'var(--sleep-theme)',
                         borderWidth: 1.2,
-                        borderDash: [10, 4], /* Alternating long dash pattern */
+                        borderDash: [6, 4], 
                         fill: false,
                         pointRadius: 0
                     },
@@ -693,7 +690,7 @@
                         label: `Comparison Track (${refDose}mg Elvanse)`,
                         data: referenceData,
                         borderColor: 'var(--elvanse-ref)',
-                        borderDash: [2, 2], /* Short dotted configuration */
+                        borderDash: [15, 8], /* Relaxed layout using fewer dashes across the timeline */
                         borderWidth: 1.5,
                         fill: false,
                         pointRadius: 0,
@@ -711,26 +708,31 @@
                         grid: {
                             display: true,
                             color: function(context) {
-                                if (context.index % 2 === 0) return 'rgba(0, 0, 0, 0.14)'; 
-                                return 'rgba(0, 0, 0, 0.02)'; 
+                                // Renders crisp layout lines every single hour (even indices) with optimized opacity
+                                if (context.index % 2 === 0) return 'rgba(0, 0, 0, 0.16)'; 
+                                return 'transparent'; 
                             },
-                            lineWidth: function(context) {
-                                return context.index % 2 === 0 ? 1.2 : 1;
-                            }
+                            lineWidth: 1
                         },
                         ticks: {
                             maxRotation: 0,
                             autoSkip: false,
                             callback: function(val, index) {
+                                // Keeps label output anchored explicitly to 2-hour increments
                                 if (index % 4 === 0) {
                                     const tObj = tickDataStore[index];
-                                    return [tObj.clock, tObj.elapsed];
+                                    return tObj.clock;
                                 }
                                 return null;
                             },
                             font: function(context) {
-                                if (context.tick && context.index === 0) {
-                                    return { weight: '700', size: 10 };
+                                const idx = context.index;
+                                // Forces bold weight profile for original baseline point and midnight steps
+                                if (idx === 0) return { weight: '700', size: 10 };
+                                if (tickDataStore[idx]) {
+                                    if (tickDataStore[idx].clock.startsWith('12:00am')) {
+                                        return { weight: '700', size: 10 };
+                                    }
                                 }
                                 return { size: 9 };
                             }
@@ -738,14 +740,14 @@
                     },
                     y: {
                         beginAtZero: true,
-                        grid: { color: 'rgba(0,0,0,0.02)' },
+                        grid: { color: 'rgba(0,0,0,0.03)' },
                         title: { display: true, text: 'Active Concentration (mg base equivalents)', font: { size: 11, weight: '600' } }
                     }
                 },
                 plugins: {
                     tooltip: {
                         padding: 10,
-                        caretPadding: 16, /* Safely offsets box window further away from mouse pointers and node circles */
+                        caretPadding: 16, /* Comfortable spacing offset from pointer line elements */
                         callbacks: {
                             title: function(context) {
                                 const idx = context[0].dataIndex;
