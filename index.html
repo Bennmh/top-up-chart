@@ -8,17 +8,19 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg-color: #f7fafc;
+            --bg-color: #f8fafc;
             --card-bg: #ffffff;
             --text-color: #2d3748;
-            --border-color: #b8c2cc; /* Darker, more defined card outlines */
+            --border-color: #d1d5db; /* Thinner, lighter line weight */
             
-            /* Chart matching identity colors */
-            --elvanse-theme: #3182ce;
-            --amfexa-theme: #dd6b20;
-            --total-theme: #805ad5;
-            --sleep-theme: #e53e3e;
-            --ref-theme: #4a5568;
+            /* High saturation color mapping */
+            --elvanse-theme: #2563eb;      /* Deep royal blue */
+            --elvanse-ref: #93c5fd;        /* Lighter desaturated blue for comparison track */
+            --amfexa-morning: #f97316;     /* Saturated warm orange */
+            --amfexa-booster: #db2777;     /* Distinct pinky-coral / deep rose */
+            --total-theme: #6d28d9;        /* Rich solid violet */
+            --sleep-theme: #ef4444;        /* Saturated red */
+            --ref-theme: #64748b;
         }
 
         body {
@@ -37,7 +39,7 @@
         header {
             text-align: left;
             margin-bottom: 20px;
-            border-bottom: 2px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
             padding-bottom: 12px;
         }
 
@@ -55,38 +57,44 @@
             .dashboard { grid-template-columns: 390px 1fr; }
         }
 
-        /* Input Column Organizer */
         .controls-column {
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 12px;
         }
 
-        /* Defined blocks with rounded outlines and soft shading matching chart paths */
+        /* Thinner, cleaner structural layout blocks */
         .input-box {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 12px; /* Extra rounded style */
-            padding: 14px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            border-radius: 10px;
+            padding: 12px;
         }
 
-        .box-base { background: #f8fafc; }
-        .box-morning { background: rgba(49, 130, 206, 0.02); }
-        .box-booster { background: rgba(221, 107, 32, 0.02); }
-        .box-sleep { background: rgba(229, 62, 62, 0.01); }
+        .box-base { background: #ffffff; }
         
-        /* Reference section visual isolation lower down */
-        .box-reference { 
-            margin-top: 15px; 
-            background: rgba(113, 128, 150, 0.03);
-            border-style: dashed;
+        /* Linked View Options Container block */
+        .view-options-group {
+            margin-top: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: #f1f5f9;
+            padding: 3px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .view-options-group .input-box {
+            border: none;
+            background: var(--card-bg);
+            border-radius: 9px;
         }
 
         .box-title {
             font-size: 0.92rem;
-            font-weight: 700; /* Distinctly bold header */
-            margin-bottom: 12px;
+            font-weight: 700;
+            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -99,7 +107,6 @@
             gap: 8px;
         }
 
-        /* Small solid indicator dot replacing the old side-bar lines */
         .title-dot {
             width: 8px;
             height: 8px;
@@ -107,24 +114,24 @@
             display: inline-block;
         }
 
-        /* Segmented Control Toggles with Enhanced High Contrast */
+        /* High Contrast Segmented Selectors */
         .segmented-control {
             display: flex;
-            background: #cbd5e0; /* Darker background track for strong contrast */
-            padding: 3px;
-            border-radius: 8px;
-            margin-bottom: 12px;
+            background: #cbd5e1;
+            padding: 2px;
+            border-radius: 6px;
+            margin-bottom: 10px;
         }
 
         .segmented-control label {
             flex: 1;
             text-align: center;
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             font-weight: 500;
-            color: #2d3748; /* Dark, legible text for unselected state */
-            padding: 6px 0;
+            color: #334155;
+            padding: 5px 0;
             cursor: pointer;
-            border-radius: 6px;
+            border-radius: 4px;
             transition: all 0.1s ease;
         }
 
@@ -132,22 +139,21 @@
         
         .segmented-control input:checked + label {
             background: var(--card-bg);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-            color: #1a202c;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+            color: #0f172a;
             font-weight: 600;
         }
 
         .input-group {
             display: flex;
             flex-direction: column;
-            gap: 5px;
-            margin-bottom: 10px;
+            gap: 4px;
+            margin-bottom: 8px;
         }
 
         .input-group:last-child { margin-bottom: 0; }
 
-        /* Inputs below titles are explicitly kept lightweight and unbolded */
-        label.field-label { font-size: 0.85rem; font-weight: 400; color: #4a5568; }
+        label.field-label { font-size: 0.84rem; font-weight: 400; color: #4b5563; }
         
         input[type="range"] {
             width: 100%;
@@ -155,26 +161,50 @@
             margin: 4px 0;
         }
 
-        /* Matching slider colors to their distinct slots */
-        #morningDose { accent-color: var(--elvanse-theme); }
-        #boosterDose, #boosterDelay { accent-color: var(--amfexa-theme); }
+        /* Distinct color tracks assigned to sliders */
+        #boosterDose, #boosterDelay { accent-color: var(--amfexa-booster); }
         #sleepThresholdSlider { accent-color: var(--sleep-theme); }
-        #refDose { accent-color: var(--ref-theme); }
+        #refDose { accent-color: var(--elvanse-ref); }
+
+        /* Step Adjuster Tools */
+        .time-stepper-container {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
 
         input[type="time"] {
             padding: 6px;
-            border: 1px solid #cbd5e0;
+            border: 1px solid #cbd5e1;
             border-radius: 6px;
             font-size: 0.9rem;
-            width: 100%;
-            box-sizing: border-box;
             background: var(--card-bg);
+            box-sizing: border-box;
+            flex: 1;
         }
+
+        .step-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            color: #334155;
+            border-radius: 6px;
+            width: 32px;
+            height: 32px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+
+        .step-btn:hover { background: #e2e8f0; }
 
         .value-display {
             font-weight: 500;
-            font-size: 0.9rem;
-            color: #4a5568;
+            font-size: 0.88rem;
+            color: #4b5563;
         }
 
         .flex-header-row {
@@ -188,9 +218,9 @@
             align-items: center;
             gap: 6px;
             cursor: pointer;
-            font-size: 0.85rem;
+            font-size: 0.84rem;
             font-weight: 400;
-            color: #4a5568;
+            color: #4b5563;
         }
 
         .checkbox-row input { width: 14px; height: 14px; margin: 0; }
@@ -200,17 +230,17 @@
             padding: 16px;
             border-radius: 12px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.01);
             height: 100%;
-            min-height: 560px;
+            min-height: 580px;
             box-sizing: border-box;
         }
 
         .info-pane {
-            font-size: 0.8rem;
-            line-height: 1.4;
-            color: #718096;
-            margin-top: 5px;
+            font-size: 0.78rem;
+            line-height: 1.35;
+            color: #64748b;
+            margin-top: 4px;
         }
     </style>
 </head>
@@ -219,7 +249,7 @@
 <div class="container">
     <header>
         <h1>ADHD Medication & Sleep Visualizer</h1>
-        <p class="subtitle">Track your medication levels and estimated sleep clearance throughout the day</p>
+        <p class="subtitle">Track medication levels and estimated sleep clearance across a 30-hour timeline</p>
     </header>
 
     <div class="dashboard">
@@ -229,15 +259,19 @@
             <div class="input-box box-base">
                 <div class="input-group">
                     <label class="field-label">Wake up time / baseline start</label>
-                    <input type="time" id="startTime" value="10:30">
+                    <div class="time-stepper-container">
+                        <input type="time" id="startTime" value="10:30">
+                        <button class="step-btn" id="stepDown" title="Minus 15 minutes">−</button>
+                        <button class="step-btn" id="stepUp" title="Plus 15 minutes">+</button>
+                    </div>
                 </div>
             </div>
 
             <!-- Consolidated Slot 1: Morning Profile -->
-            <div class="input-box box-morning" id="morningCard">
+            <div class="input-box" id="morningCard">
                 <div class="box-title">
                     <div class="title-left-group">
-                        <span class="title-dot" id="morningDot" style="background-color: var(--elvanse-theme);"></span>
+                        <span class="title-dot" id="morningDot"></span>
                         <span>Slot 1: Morning dose</span>
                     </div>
                 </div>
@@ -259,10 +293,10 @@
             </div>
 
             <!-- Slot 2: Afternoon Booster Track -->
-            <div class="input-box box-booster">
+            <div class="input-box" style="background: rgba(219, 39, 119, 0.01);">
                 <div class="box-title">
                     <div class="title-left-group">
-                        <span class="title-dot" style="background-color: var(--amfexa-theme);"></span>
+                        <span class="title-dot" style="background-color: var(--amfexa-booster);"></span>
                         <span>Slot 2: Afternoon booster</span>
                     </div>
                     <label class="checkbox-row">
@@ -289,44 +323,46 @@
                 </div>
             </div>
 
-            <!-- Sleep Threshold Line Config -->
-            <div class="input-box box-sleep">
-                <div class="box-title">
-                    <div class="title-left-group">
-                        <span class="title-dot" style="background-color: var(--sleep-theme);"></span>
-                        <span>Sleep window</span>
+            <!-- Attached Secondary Configuration Block Group -->
+            <div class="view-options-group">
+                <!-- Sleep Threshold Line Config -->
+                <div class="input-box">
+                    <div class="box-title">
+                        <div class="title-left-group">
+                            <span class="title-dot" style="background-color: var(--sleep-theme);"></span>
+                            <span>Sleep window option</span>
+                        </div>
                     </div>
-                </div>
-                <div class="input-group">
-                    <div class="flex-header-row">
-                        <label class="field-label">Required drop in medication levels for sleep</label>
-                        <span id="sleepThresholdVal" class="value-display">75% drop</span>
-                    </div>
-                    <input type="range" id="sleepThresholdSlider" min="40" max="95" step="5" value="75">
-                </div>
-            </div>
-
-            <!-- Comparison Space -->
-            <div class="input-box box-reference">
-                <div class="box-title">
-                    <div class="title-left-group">
-                        <span class="title-dot" style="background-color: var(--ref-theme);"></span>
-                        <span>Comparison track</span>
-                    </div>
-                    <label class="checkbox-row">
-                        <input type="checkbox" id="useRef"> Show
-                    </label>
-                </div>
-                
-                <div id="refControls" style="display: none;">
                     <div class="input-group">
                         <div class="flex-header-row">
-                            <label class="field-label">Compare with a single morning dose</label>
-                            <span id="refDoseVal" class="value-display">60 mg</span>
+                            <label class="field-label">Required drop in levels for sleep</label>
+                            <span id="sleepThresholdVal" class="value-display">75% drop</span>
                         </div>
-                        <input type="range" id="refDose" min="20" max="100" step="5" value="60">
+                        <input type="range" id="sleepThresholdSlider" min="40" max="95" step="5" value="75">
                     </div>
-                    <div class="info-pane">Plots a secondary line to compare split dosing against a single larger morning dose.</div>
+                </div>
+
+                <!-- Comparison Space -->
+                <div class="input-box" style="border-top: 1px solid #e2e8f0; border-radius: 0 0 9px 9px;">
+                    <div class="box-title">
+                        <div class="title-left-group">
+                            <span class="title-dot" style="background-color: var(--elvanse-ref);"></span>
+                            <span>Comparison track (Elvanse)</span>
+                        </div>
+                        <label class="checkbox-row">
+                            <input type="checkbox" id="useRef"> Show
+                        </label>
+                    </div>
+                    
+                    <div id="refControls" style="display: none;">
+                        <div class="input-group">
+                            <div class="flex-header-row">
+                                <label class="field-label">Compare with a single morning dose</label>
+                                <span id="refDoseVal" class="value-display">60 mg</span>
+                            </div>
+                            <input type="range" id="refDose" min="20" max="100" step="5" value="60">
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -334,7 +370,7 @@
 
         <!-- Graph Field Panel -->
         <div class="visualizer-card">
-            <div style="position: relative; width:100%; height:100%; min-height: 520px;">
+            <div style="position: relative; width:100%; height:100%; min-height: 540px;">
                 <canvas id="chartCanvas"></canvas>
             </div>
         </div>
@@ -342,7 +378,6 @@
 </div>
 
 <script>
-    // Constants for pharmacokinetic tracking models
     const pkin = {
         elvanse: { ka: 0.65, ke: 0.063, bio: 0.297 }, 
         amfexa:  { ka: 2.50, ke: 0.068, bio: 0.730 }  
@@ -350,9 +385,12 @@
 
     // DOM References
     const startTimeInput = document.getElementById('startTime');
+    const stepDownBtn = document.getElementById('stepDown');
+    const stepUpBtn = document.getElementById('stepUp');
     const morningDoseSlider = document.getElementById('morningDose');
     const morningDoseVal = document.getElementById('morningDoseVal');
     const morningCard = document.getElementById('morningCard');
+    const morningDot = document.getElementById('morningDot');
     const useBoosterCheck = document.getElementById('useBooster');
     const boosterControls = document.getElementById('boosterControls');
     const boosterDoseSlider = document.getElementById('boosterDose');
@@ -370,8 +408,7 @@
     let simulationChart = null;
     let tickDataStore = [];
 
-    // Local Storage Persistence Protocol
-    const CACHE_KEY = 'adhd_visualizer_v2_cache';
+    const CACHE_KEY = 'adhd_visualizer_v3_cache';
 
     function saveState() {
         const state = {
@@ -408,23 +445,40 @@
             refSlider.value = state.refDose;
             sleepThresholdSlider.value = state.sleepThreshold;
         } catch (e) {
-            console.error("Cache reconstruction error", e);
+            console.error("Cache system bypass failed", e);
         }
     }
 
-    // Dynamic Range Management for Unified Box 1
+    // Dynamic color & background shifts for Slot 1 matching selections
     function adjustMorningSliderLimits(type, resetValue = true) {
         if (type === 'elvanse') {
             morningDoseSlider.min = "20"; morningDoseSlider.max = "100"; morningDoseSlider.step = "5";
             if (resetValue) morningDoseSlider.value = "45";
-            document.getElementById('morningDot').style.backgroundColor = "var(--elvanse-theme)";
+            morningDot.style.backgroundColor = "var(--elvanse-theme)";
             morningDoseSlider.style.accentColor = "var(--elvanse-theme)";
+            morningCard.style.backgroundColor = "rgba(37, 99, 235, 0.02)";
         } else {
             morningDoseSlider.min = "1.25"; morningDoseSlider.max = "20"; morningDoseSlider.step = "1.25";
             if (resetValue) morningDoseSlider.value = "5";
-            document.getElementById('morningDot').style.backgroundColor = "var(--amfexa-theme)";
-            morningDoseSlider.style.accentColor = "var(--amfexa-theme)";
+            morningDot.style.backgroundColor = "var(--amfexa-morning)";
+            morningDoseSlider.style.accentColor = "var(--amfexa-morning)";
+            morningCard.style.backgroundColor = "rgba(249, 115, 22, 0.02)";
         }
+    }
+
+    function handleTimeStep(changeMinutes) {
+        let [h, m] = startTimeInput.value.split(':').map(Number);
+        let totalMinutes = h * 60 + m + changeMinutes;
+        
+        if (totalMinutes < 0) totalMinutes += 1440;
+        if (totalMinutes >= 1440) totalMinutes %= 1440;
+        
+        const newH = Math.floor(totalMinutes / 60).toString().padStart(2, '0');
+        const newM = (totalMinutes % 60).toString().padStart(2, '0');
+        startTimeInput.value = `${newH}:${newM}`;
+        
+        renderSimulation();
+        saveState();
     }
 
     function formatTimeLabel(startStr, elapsedHours) {
@@ -441,7 +495,8 @@
 
         return {
             clock: `${hour12}:${displayMinutes}${period}${dayMarker}`,
-            elapsed: `+${elapsedHours}h`
+            elapsed: `+${elapsedHours}h`,
+            totalMinutesAbsolute: totalMinutesAbsolute
         };
     }
 
@@ -450,26 +505,47 @@
         return payload * (ka / (ka - ke)) * (Math.exp(-ke * t) - Math.exp(-ka * t));
     }
 
-    // Custom Plugin to Render Realtime Progress Marker (Now styled cleanly in lowercase)
+    // Customized Timeline enhancements: draws "now" marker and distinct Midnight boundary lines
     const timelineEnhancementsPlugin = {
         id: 'timelineEnhancements',
         afterDraw: (chart) => {
             const xAxis = chart.scales.x;
             const yAxis = chart.scales.y;
             if (!xAxis || !yAxis) return;
+            const ctx = chart.ctx;
 
             const baseTimeStr = startTimeInput.value || "10:30";
             const [sh, sm] = baseTimeStr.split(':').map(Number);
             
+            // Draw Day Boundary (Midnight Line) if it falls within scope
+            for (let hour = 0; hour <= 30; hour += 0.5) {
+                const absoluteMins = (sh * 60) + sm + Math.round(hour * 60);
+                if (absoluteMins % 1440 === 0 && hour > 0) {
+                    const xLine = xAxis.getPixelForValue(hour * 2);
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.moveTo(xLine, yAxis.top);
+                    ctx.lineTo(xLine, yAxis.bottom);
+                    ctx.strokeStyle = '#475569';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#475569';
+                    ctx.font = '600 10px sans-serif';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(' Midnight (new day)', xLine + 4, yAxis.top + 14);
+                    ctx.restore();
+                }
+            }
+
+            // Live Time Indicator
             const now = new Date();
             const elapsedMins = (now.getHours() * 60 + now.getMinutes()) - (sh * 60 + sm);
             let absoluteElapsed = elapsedMins >= 0 ? elapsedMins / 60 : (elapsedMins + 1440) / 60;
 
             if (absoluteElapsed >= 0 && absoluteElapsed <= 30) {
                 const xPixel = xAxis.getPixelForValue(absoluteElapsed * 2); 
-                const ctx = chart.ctx;
                 ctx.save();
-                
                 ctx.beginPath();
                 ctx.moveTo(xPixel, yAxis.top);
                 ctx.lineTo(xPixel, yAxis.bottom);
@@ -478,16 +554,14 @@
                 ctx.setLineDash([3, 3]);
                 ctx.stroke();
 
-                // Format live system clock string to lowercase info tab
                 let liveHours = now.getHours();
                 const liveMins = now.getMinutes().toString().padStart(2, '0');
                 const liveAmPm = liveHours >= 12 ? 'pm' : 'am';
-                liveHours = liveHours % 12;
-                liveHours = liveHours ? liveHours : 12;
+                liveHours = liveHours % 12 || 12;
                 const formattedNowString = `${liveHours}:${liveMins}${liveAmPm} (now)`;
 
                 ctx.fillStyle = '#0d9488';
-                ctx.font = '500 11px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.font = '500 11px sans-serif';
                 ctx.textAlign = 'center';
                 ctx.fillText(formattedNowString, xPixel, yAxis.top - 6);
                 ctx.restore();
@@ -506,7 +580,7 @@
         const refDose = parseFloat(refSlider.value);
         const dropPercent = parseFloat(sleepThresholdSlider.value);
 
-        // UI Label Value Syncs
+        // Synchronize numeric readouts
         morningDoseVal.textContent = `${morningDose} mg`;
         boosterDoseVal.textContent = `${boosterDose.toFixed(2)} mg`;
         boosterDelayVal.textContent = `${boosterDelay.toFixed(1)}h later`;
@@ -553,13 +627,13 @@
             sleepLineData.push(dynamicThresholdValue);
         }
 
-        // Structural fix: Update datasets directly without destroying the canvas to eliminate jumpy re-render loops
+        // Direct data updates without rebuilding instances eliminates choppy rendering animations
         if (simulationChart) {
             simulationChart.data.labels = rawLabels;
             simulationChart.data.datasets[0].data = totalData;
             simulationChart.data.datasets[1].data = sleepLineData;
             simulationChart.data.datasets[2].data = morningData;
-            simulationChart.data.datasets[2].borderColor = morningType === 'elvanse' ? '#3182ce' : '#dd6b20';
+            simulationChart.data.datasets[2].borderColor = morningType === 'elvanse' ? 'var(--elvanse-theme)' : 'var(--amfexa-morning)';
             simulationChart.data.datasets[2].label = morningType === 'elvanse' ? 'Morning Base (Elvanse)' : 'Morning Base (Amfexa)';
             simulationChart.data.datasets[3].data = boosterData;
             simulationChart.data.datasets[3].hidden = !addBooster;
@@ -567,7 +641,7 @@
             simulationChart.data.datasets[4].hidden = !addRef;
             simulationChart.data.datasets[4].label = `Comparison Track (${refDose}mg Elvanse)`;
             
-            simulationChart.update('none'); // Update mode 'none' drops layout animations safely
+            simulationChart.update('none'); 
             return;
         }
 
@@ -580,26 +654,26 @@
                     {
                         label: 'Active System Profile',
                         data: totalData,
-                        borderColor: '#805ad5',
-                        backgroundColor: 'rgba(128, 90, 213, 0.02)',
+                        borderColor: 'var(--total-theme)',
+                        backgroundColor: 'rgba(109, 40, 217, 0.01)',
                         fill: true,
                         borderWidth: 2.5,
                         pointRadius: 0,
-                        tension: 0.15
+                        tension: 0.12
                     },
                     {
                         label: 'Sleep Clearance Indicator',
                         data: sleepLineData,
-                        borderColor: '#e53e3e',
+                        borderColor: 'var(--sleep-theme)',
                         borderWidth: 1.2,
-                        borderDash: [5, 4],
+                        borderDash: [10, 4], /* Alternating long dash pattern */
                         fill: false,
                         pointRadius: 0
                     },
                     {
                         label: morningType === 'elvanse' ? 'Morning Base (Elvanse)' : 'Morning Base (Amfexa)',
                         data: morningData,
-                        borderColor: morningType === 'elvanse' ? '#3182ce' : '#dd6b20',
+                        borderColor: morningType === 'elvanse' ? 'var(--elvanse-theme)' : 'var(--amfexa-morning)',
                         borderDash: [4, 4],
                         borderWidth: 1.2,
                         fill: false,
@@ -608,8 +682,8 @@
                     {
                         label: 'Slot 2 Booster',
                         data: boosterData,
-                        borderColor: '#d53f8c',
-                        borderDash: [3, 3],
+                        borderColor: 'var(--amfexa-booster)',
+                        borderDash: [4, 4],
                         borderWidth: 1.2,
                         fill: false,
                         pointRadius: 0,
@@ -618,9 +692,9 @@
                     {
                         label: `Comparison Track (${refDose}mg Elvanse)`,
                         data: referenceData,
-                        borderColor: '#4a5568',
-                        borderDash: [2, 2],
-                        borderWidth: 1.2,
+                        borderColor: 'var(--elvanse-ref)',
+                        borderDash: [2, 2], /* Short dotted configuration */
+                        borderWidth: 1.5,
                         fill: false,
                         pointRadius: 0,
                         hidden: !addRef
@@ -630,14 +704,14 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                animation: false, // Turn off entry transitions completely to fix shifting canvas bugs
+                animation: false, 
                 interaction: { mode: 'index', intersect: false },
                 scales: {
                     x: {
                         grid: {
                             display: true,
                             color: function(context) {
-                                if (context.index % 2 === 0) return 'rgba(0, 0, 0, 0.15)'; 
+                                if (context.index % 2 === 0) return 'rgba(0, 0, 0, 0.14)'; 
                                 return 'rgba(0, 0, 0, 0.02)'; 
                             },
                             lineWidth: function(context) {
@@ -656,7 +730,7 @@
                             },
                             font: function(context) {
                                 if (context.tick && context.index === 0) {
-                                    return { weight: '700', size: 10 }; // Bold format applied exclusively to Row 0 hours
+                                    return { weight: '700', size: 10 };
                                 }
                                 return { size: 9 };
                             }
@@ -664,17 +738,18 @@
                     },
                     y: {
                         beginAtZero: true,
-                        grid: { color: 'rgba(0,0,0,0.03)' },
-                        title: { display: true, text: 'Active Bio-Availability (mg base equivalents)', font: { size: 11, weight: '600' } }
+                        grid: { color: 'rgba(0,0,0,0.02)' },
+                        title: { display: true, text: 'Active Concentration (mg base equivalents)', font: { size: 11, weight: '600' } }
                     }
                 },
                 plugins: {
                     tooltip: {
                         padding: 10,
+                        caretPadding: 16, /* Safely offsets box window further away from mouse pointers and node circles */
                         callbacks: {
                             title: function(context) {
                                 const idx = context[0].dataIndex;
-                                return `Time Window: ${rawLabels[idx].replace('*', ' (Next Day)')} (+${idx * 0.5}h tracking)`;
+                                return `Time window: ${rawLabels[idx].replace('*', ' (next day)')} (+${idx * 0.5}h tracking)`;
                             }
                         }
                     }
@@ -683,7 +758,7 @@
         });
     }
 
-    // Input Event Registration Matrix with Storage Hooks
+    // Input Trigger Registry
     const triggerElements = [
         startTimeInput, morningDoseSlider, useBoosterCheck, 
         boosterDoseSlider, boosterDelaySlider, useRefCheck, refSlider, sleepThresholdSlider
@@ -704,11 +779,13 @@
         });
     });
 
+    stepDownBtn.addEventListener('click', () => handleTimeStep(-15));
+    stepUpBtn.addEventListener('click', () => handleTimeStep(15));
+
     // Run Initialization Sequence
     loadState();
     renderSimulation();
 
-    // Auto-refresh the live vertical line positioning every 60 seconds
     setInterval(() => {
         if (simulationChart) { simulationChart.draw(); }
     }, 60000);
