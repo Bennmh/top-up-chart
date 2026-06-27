@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ADHD Medication Calibrated Tracker</title>
+    <title>ADHD Medication Sleep & Grid Visualizer (Dual-Amfexa Edition)</title>
     <!-- Chart.js CDN for clean, reactive graphing -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -12,7 +12,8 @@
             --card-bg: #ffffff;
             --text-color: #2d3748;
             --elvanse-color: #3182ce;
-            --amfexa-color: #dd6b20;
+            --amfexa-1-color: #dd6b20;
+            --amfexa-2-color: #d53f8c;
             --total-color: #805ad5;
             --ref-color: #718096;
             --sleep-color: #e53e3e;
@@ -27,7 +28,7 @@
         }
 
         .container {
-            max-width: 1100px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
@@ -45,8 +46,8 @@
             gap: 20px;
         }
 
-        @media (min-width: 850px) {
-            .dashboard { grid-template-columns: 380px 1fr; }
+        @media (min-width: 900px) {
+            .dashboard { grid-template-columns: 400px 1fr; }
         }
 
         .controls-card {
@@ -56,7 +57,9 @@
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
             display: flex;
             flex-direction: column;
-            gap: 18px;
+            gap: 16px;
+            max-height: 85vh;
+            overflow-y: auto;
         }
 
         .visualizer-card {
@@ -76,7 +79,8 @@
 
         label { font-weight: 600; font-size: 0.9rem; }
         .elvanse-label { color: var(--elvanse-color); }
-        .amfexa-label { color: var(--amfexa-color); }
+        .amfexa-1-label { color: var(--amfexa-1-color); }
+        .amfexa-2-label { color: var(--amfexa-2-color); }
         .ref-label { color: var(--ref-color); }
         .sleep-label { color: var(--sleep-color); }
 
@@ -123,21 +127,28 @@
         .hidden-control {
             display: none;
             flex-direction: column;
-            gap: 18px;
+            gap: 14px;
             border-left: 3px solid #e2e8f0;
             padding-left: 12px;
+            margin-top: 4px;
         }
 
         .hidden-control.active { display: flex; }
 
         .info-panel {
-            margin-top: 10px;
+            margin-top: 5px;
             padding: 12px;
             background: #edf2f7;
             border-radius: 8px;
             font-size: 0.82rem;
             line-height: 1.4;
             color: #4a5568;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #e2e8f0;
+            margin: 4px 0;
         }
     </style>
 </head>
@@ -146,7 +157,7 @@
 <div class="container">
     <header>
         <h1>ADHD Medication Sleep & Grid Visualizer</h1>
-        <p class="subtitle">Calibrated timeline mapping metabolic drop-off to clinical sleep compatibility windows</p>
+        <p class="subtitle">Custom multi-dose tracking optimized for weekday baselines and flexible weekend splits</p>
     </header>
 
     <div class="dashboard">
@@ -156,52 +167,81 @@
             
             <!-- Timing Base -->
             <div class="input-group">
-                <label style="color: #1a202c;">Morning Dose Awakening Time</label>
+                <label style="color: #1a202c;">Awakening / Base Start Time</label>
                 <input type="time" id="startTime" value="10:30">
             </div>
 
-            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 5px 0;">
-
-            <!-- Elvanse Core Profile -->
-            <div class="input-group">
-                <div class="flex-row">
-                    <label class="elvanse-label">Morning Elvanse Dose</label>
-                    <span id="elvanseDoseVal" class="value-display">45 mg</span>
-                </div>
-                <input type="range" id="elvanseDose" min="0" max="100" step="5" value="45">
-            </div>
-
-            <!-- Amfexa Configuration Toggle -->
+            <!-- Elvanse Core Profile Toggle -->
             <div class="input-group checkbox-group">
-                <input type="checkbox" id="useAmfexa" checked>
-                <label for="useAmfexa" class="amfexa-label">Include Amfexa Booster</label>
+                <input type="checkbox" id="useElvanse" checked>
+                <label for="useElvanse" class="elvanse-label">Include Morning Elvanse (Weekday)</label>
             </div>
 
-            <div id="amfexaControls" class="hidden-control active">
+            <div id="elvanseControls" class="hidden-control active">
                 <div class="input-group">
                     <div class="flex-row">
-                        <label class="amfexa-label">Amfexa Booster Dose</label>
-                        <span id="amfexaDoseVal" class="value-display">5.0 mg</span>
+                        <label class="elvanse-label">Elvanse Dose strength</label>
+                        <span id="elvanseDoseVal" class="value-display">45 mg</span>
                     </div>
-                    <input type="range" id="amfexaDose" min="0" max="20" step="2.5" value="5">
+                    <input type="range" id="elvanseDose" min="20" max="100" step="5" value="45">
+                </div>
+            </div>
+
+            <!-- Amfexa 1 Configuration -->
+            <div class="input-group checkbox-group">
+                <input type="checkbox" id="useAmfexa1" checked>
+                <label for="useAmfexa1" class="amfexa-1-label">Include Amfexa Dose 1</label>
+            </div>
+
+            <div id="amfexa1Controls" class="hidden-control active">
+                <div class="input-group">
+                    <div class="flex-row">
+                        <label class="amfexa-1-color">Amfexa 1 Strength</label>
+                        <span id="amfexa1DoseVal" class="value-display">5.0 mg</span>
+                    </div>
+                    <input type="range" id="amfexa1Dose" min="1.25" max="20" step="1.25" value="5">
                 </div>
 
                 <div class="input-group">
                     <div class="flex-row">
-                        <label class="amfexa-label">Booster Delay</label>
-                        <span id="amfexaTimingVal" class="value-display">5.0h later</span>
+                        <label class="amfexa-1-color">Timing Delay</label>
+                        <span id="amfexa1TimingVal" class="value-display">5.0h later</span>
                     </div>
-                    <input type="range" id="amfexaDelay" min="1" max="16" step="0.5" value="5">
+                    <input type="range" id="amfexa1Delay" min="0" max="16" step="0.5" value="5">
+                </div>
+            </div>
+
+            <!-- Amfexa 2 Configuration -->
+            <div class="input-group checkbox-group">
+                <input type="checkbox" id="useAmfexa2">
+                <label for="useAmfexa2" class="amfexa-2-label">Include Amfexa Dose 2 (Weekend Split)</label>
+            </div>
+
+            <div id="amfexa2Controls" class="hidden-control">
+                <div class="input-group">
+                    <div class="flex-row">
+                        <label class="amfexa-2-color">Amfexa 2 Strength</label>
+                        <span id="amfexa2DoseVal" class="value-display">5.0 mg</span>
+                    </div>
+                    <input type="range" id="amfexa2Dose" min="1.25" max="20" step="1.25" value="5">
+                </div>
+
+                <div class="input-group">
+                    <div class="flex-row">
+                        <label class="amfexa-2-color">Timing Delay</label>
+                        <span id="amfexa2TimingVal" class="value-display">9.0h later</span>
+                    </div>
+                    <input type="range" id="amfexa2Delay" min="0" max="16" step="0.5" value="9">
                 </div>
             </div>
 
             <!-- Equivalence Reference Toggle -->
-            <div class="input-group checkbox-group" style="border-top: 1px solid #e2e8f0; padding-top: 12px;">
-                <input type="checkbox" id="useRef" checked>
-                <label for="useRef" class="ref-label">Compare to Higher Elvanse Dose</label>
+            <div class="input-group checkbox-group">
+                <input type="checkbox" id="useRef">
+                <label for="useRef" class="ref-label">Compare to Baseline Reference</label>
             </div>
 
-            <div id="refControls" class="hidden-control active">
+            <div id="refControls" class="hidden-control">
                 <div class="input-group">
                     <div class="flex-row">
                         <label class="ref-label">Reference Elvanse Strength</label>
@@ -211,23 +251,23 @@
                 </div>
             </div>
 
-            <!-- NEW: Sleep Line Calibration Slider -->
+            <!-- Sleep Line Calibration Slider -->
             <div class="input-group" style="border-top: 1px solid #e2e8f0; padding-top: 12px;">
                 <div class="flex-row">
                     <label class="sleep-label">Your Sleep Sensitivity Threshold</label>
                     <span id="sleepThresholdVal" class="value-display">75% drop</span>
                 </div>
-                <input type="range" id="sleepThresholdSlider" min="40" max="90" step="5" value="75">
+                <input type="range" id="sleepThresholdSlider" min="40" max="95" step="5" value="75">
             </div>
 
             <div class="info-panel">
-                <strong>How to calibrate:</strong> If you know that a 10:30 AM Elvanse dose usually lets you sleep by midnight, adjust this sensitivity slider until the red line intersects your curve right at 12:00 AM. 
+                <strong>Weekend Mode Layout:</strong> To test your off-Elvanse strategy, untick the morning Elvanse box. Set <strong>Amfexa 1 Delay to 0.0h</strong> to make it your awakening dose, then activate <strong>Amfexa 2</strong> as your afternoon top-up.
             </div>
         </div>
 
         <!-- Visual Analytics Box -->
         <div class="visualizer-card">
-            <div style="position: relative; width:100%; height:100%; min-height: 480px;">
+            <div style="position: relative; width:100%; height:100%; min-height: 520px;">
                 <canvas id="chartCanvas"></canvas>
             </div>
         </div>
@@ -235,19 +275,32 @@
 </div>
 
 <script>
+    // Elimination Rate Constants
     const elvanseKa = 0.65; const elvanseKe = 0.063;
     const amfexaKa = 2.50;  const amfexaKe = 0.068;
 
+    // Element Registries
     const startTimeInput = document.getElementById('startTime');
+    
+    const useElvanseCheck = document.getElementById('useElvanse');
+    const elvanseControls = document.getElementById('elvanseControls');
     const elvanseSlider = document.getElementById('elvanseDose');
     const elvanseDoseVal = document.getElementById('elvanseDoseVal');
-    const useAmfexaCheck = document.getElementById('useAmfexa');
-    const amfexaControls = document.getElementById('amfexaControls');
-    const amfexaSlider = document.getElementById('amfexaDose');
-    const amfexaDoseVal = document.getElementById('amfexaDoseVal');
-    const amfexaDelaySlider = document.getElementById('amfexaDelay');
-    const amfexaTimingVal = document.getElementById('amfexaTimingVal');
+
+    const useAmfexa1Check = document.getElementById('useAmfexa1');
+    const amfexa1Controls = document.getElementById('amfexa1Controls');
+    const amfexa1Slider = document.getElementById('amfexa1Dose');
+    const amfexa1DoseVal = document.getElementById('amfexa1DoseVal');
+    const amfexa1DelaySlider = document.getElementById('amfexa1Delay');
+    const amfexa1TimingVal = document.getElementById('amfexa1TimingVal');
     
+    const useAmfexa2Check = document.getElementById('useAmfexa2');
+    const amfexa2Controls = document.getElementById('amfexa2Controls');
+    const amfexa2Slider = document.getElementById('amfexa2Dose');
+    const amfexa2DoseVal = document.getElementById('amfexa2DoseVal');
+    const amfexa2DelaySlider = document.getElementById('amfexa2Delay');
+    const amfexa2TimingVal = document.getElementById('amfexa2TimingVal');
+
     const useRefCheck = document.getElementById('useRef');
     const refControls = document.getElementById('refControls');
     const refSlider = document.getElementById('refDose');
@@ -286,68 +339,77 @@
 
     function renderSimulation() {
         const baseStartTime = startTimeInput.value || "10:30";
+        const addElvanse = useElvanseCheck.checked;
         const elvanseDose = parseFloat(elvanseSlider.value);
-        const addAmfexa = useAmfexaCheck.checked;
-        const amfexaDose = parseFloat(amfexaSlider.value);
-        const amfexaDelay = parseFloat(amfexaDelaySlider.value);
+        
+        const addAmfexa1 = useAmfexa1Check.checked;
+        const amfexa1Dose = parseFloat(amfexa1Slider.value);
+        const amfexa1Delay = parseFloat(amfexa1DelaySlider.value);
+
+        const addAmfexa2 = useAmfexa2Check.checked;
+        const amfexa2Dose = parseFloat(amfexa2Slider.value);
+        const amfexa2Delay = parseFloat(amfexa2DelaySlider.value);
+
         const addRef = useRefCheck.checked;
         const refDose = parseFloat(refSlider.value);
         const dropPercent = parseFloat(sleepThresholdSlider.value);
 
+        // Update value representations on UI
         elvanseDoseVal.textContent = `${elvanseDose} mg`;
-        amfexaDoseVal.textContent = `${amfexaDose.toFixed(1)} mg`;
-        amfexaTimingVal.textContent = `${amfexaDelay.toFixed(1)}h later`;
+        amfexa1DoseVal.textContent = `${amfexa1Dose.toFixed(2)} mg`;
+        amfexa1TimingVal.textContent = amfexa1Delay === 0 ? "At Awakening" : `${amfexa1Delay.toFixed(1)}h later`;
+        amfexa2DoseVal.textContent = `${amfexa2Dose.toFixed(2)} mg`;
+        amfexa2TimingVal.textContent = amfexa2Delay === 0 ? "At Awakening" : `${amfexa2Delay.toFixed(1)}h later`;
         refDoseVal.textContent = `${refDose} mg`;
         sleepThresholdVal.textContent = `${dropPercent}% drop`;
 
-        amfexaControls.style.display = addAmfexa ? 'flex' : 'none';
+        // Visibility Toggles
+        elvanseControls.style.display = addElvanse ? 'flex' : 'none';
+        amfexa1Controls.style.display = addAmfexa1 ? 'flex' : 'none';
+        amfexa2Controls.style.display = addAmfexa2 ? 'flex' : 'none';
         refControls.style.display = addRef ? 'flex' : 'none';
 
         const rawLabels = [];
         const xTicksDisplay = [];
         const elvanseData = [];
-        const amfexaData = [];
+        const amfexa1Data = [];
+        const amfexa2Data = [];
         const totalData = [];
         const referenceData = [];
 
-        // Find peak to dynamically drop from
-        let maxMorningElvanseConc = 0;
-        const activeElvanseBase = elvanseDose * 0.297;
-        
+        // PRE-PASS: Find the true peak maximum value of active selections to establish baseline
+        let structuralPeak = 0;
         for (let hour = 0; hour <= 30; hour += 0.5) {
-            const concElvanse = calculateConcentration(activeElvanseBase, elvanseKa, elvanseKe, hour);
-            if (concElvanse > maxMorningElvanseConc) {
-                maxMorningElvanseConc = concElvanse;
-            }
+            let evalE = addElvanse ? calculateConcentration(elvanseDose * 0.297, elvanseKa, elvanseKe, hour) : 0;
+            let evalA1 = addAmfexa1 ? calculateConcentration(amfexa1Dose * 0.730, amfexaKa, amfexaKe, hour - amfexa1Delay) : 0;
+            let evalA2 = addAmfexa2 ? calculateConcentration(amfexa2Dose * 0.730, amfexaKa, amfexaKe, hour - amfexa2Delay) : 0;
+            let currentSum = evalE + evalA1 + evalA2;
+            if (currentSum > structuralPeak) structuralPeak = currentSum;
         }
+        if (structuralPeak === 0) structuralPeak = 1;
 
-        // Calculate the custom threshold based on user slider input
-        const dynamicSleepThreshold = maxMorningElvanseConc * (1 - (dropPercent / 100));
+        const dynamicSleepThreshold = structuralPeak * (1 - (dropPercent / 100));
         const sleepThresholdLineData = [];
 
+        // MAIN GENERATION LOOP
         for (let hour = 0; hour <= 30; hour += 0.5) {
             const clockString = formatTo12HourClock(baseStartTime, hour);
             rawLabels.push(clockString); 
             xTicksDisplay.push(`+${hour}h (${clockString.replace(' *', '*')})`);
 
-            const concElvanse = calculateConcentration(activeElvanseBase, elvanseKa, elvanseKe, hour);
-
-            let concAmfexa = 0;
-            if (addAmfexa) {
-                const tAmfexa = hour - amfexaDelay;
-                const activeAmfexaBase = amfexaDose * 0.730;
-                concAmfexa = calculateConcentration(activeAmfexaBase, amfexaKa, amfexaKe, tAmfexa);
-            }
+            const concElvanse = addElvanse ? calculateConcentration(elvanseDose * 0.297, elvanseKa, elvanseKe, hour) : 0;
+            const concAmfexa1 = addAmfexa1 ? calculateConcentration(amfexa1Dose * 0.730, amfexaKa, amfexaKe, hour - amfexa1Delay) : 0;
+            const concAmfexa2 = addAmfexa2 ? calculateConcentration(amfexa2Dose * 0.730, amfexaKa, amfexaKe, hour - amfexa2Delay) : 0;
 
             let concRef = 0;
             if (addRef) {
-                const activeRefBase = refDose * 0.297;
-                concRef = calculateConcentration(activeRefBase, elvanseKa, elvanseKe, hour);
+                concRef = calculateConcentration(refDose * 0.297, elvanseKa, elvanseKe, hour);
             }
 
             elvanseData.push(concElvanse);
-            amfexaData.push(concAmfexa);
-            totalData.push(concElvanse + concAmfexa);
+            amfexa1Data.push(concAmfexa1);
+            amfexa2Data.push(concAmfexa2);
+            totalData.push(concElvanse + concAmfexa1 + concAmfexa2);
             referenceData.push(concRef);
             sleepThresholdLineData.push(dynamicSleepThreshold);
         }
@@ -363,7 +425,7 @@
                         label: 'Your Strategy (Total Profile)',
                         data: totalData,
                         borderColor: '#805ad5',
-                        backgroundColor: 'rgba(128, 90, 213, 0.05)',
+                        backgroundColor: 'rgba(128, 90, 213, 0.03)',
                         fill: true,
                         borderWidth: 3,
                         pointRadius: 0,
@@ -374,7 +436,7 @@
                         data: sleepThresholdLineData,
                         borderColor: '#e53e3e',
                         borderWidth: 1.5,
-                        borderDash: [6, 4],
+                        borderDash: [5, 4],
                         fill: false,
                         pointRadius: 0,
                         tension: 0
@@ -385,18 +447,31 @@
                         borderColor: '#3182ce',
                         borderDash: [4, 4],
                         fill: false,
-                        borderWidth: 1.5,
+                        borderWidth: 1.2,
                         pointRadius: 0,
+                        hidden: !addElvanse,
                         tension: 0.2
                     },
                     {
-                        label: 'Amfexa Component',
-                        data: amfexaData,
+                        label: 'Amfexa Dose 1',
+                        data: amfexa1Data,
                         borderColor: '#dd6b20',
-                        borderDash: [4, 4],
+                        borderDash: [3, 3],
                         fill: false,
-                        borderWidth: 1.5,
+                        borderWidth: 1.2,
                         pointRadius: 0,
+                        hidden: !addAmfexa1,
+                        tension: 0.2
+                    },
+                    {
+                        label: 'Amfexa Dose 2',
+                        data: amfexa2Data,
+                        borderColor: '#d53f8c',
+                        borderDash: [3, 3],
+                        fill: false,
+                        borderWidth: 1.2,
+                        pointRadius: 0,
+                        hidden: !addAmfexa2,
                         tension: 0.2
                     },
                     {
@@ -405,7 +480,7 @@
                         borderColor: '#718096',
                         borderDash: [2, 2],
                         fill: false,
-                        borderWidth: 2,
+                        borderWidth: 1.5,
                         pointRadius: 0,
                         hidden: !addRef,
                         tension: 0.2
@@ -415,16 +490,13 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                interaction: {
-                    mode: 'index',
-                    intersect: false
-                },
+                interaction: { mode: 'index', intersect: false },
                 scales: {
                     x: {
                         grid: { 
                             display: true,
                             color: function(context) {
-                                return context.index % 2 === 0 ? 'rgba(0, 0, 0, 0.08)' : 'rgba(0, 0, 0, 0.02)';
+                                return context.index % 2 === 0 ? 'rgba(0, 0, 0, 0.06)' : 'rgba(0, 0, 0, 0.01)';
                             }
                         },
                         title: { display: true, text: 'Time Line View (* represents next day sequence)' },
@@ -436,7 +508,7 @@
                     },
                     y: {
                         beginAtZero: true,
-                        grid: { color: 'rgba(0,0,0,0.04)' },
+                        grid: { color: 'rgba(0,0,0,0.03)' },
                         title: { display: true, text: 'Active Payload Concentration (mg base equivalents)' }
                     }
                 },
@@ -450,7 +522,7 @@
                             },
                             label: function(context) {
                                 if (context.dataset.label === 'Sleep Threshold Indicator') {
-                                    return ` ${context.dataset.label}: Target < ${context.parsed.y.toFixed(2)} mg`;
+                                    return ` ${context.dataset.label}: Sleep Compatible < ${context.parsed.y.toFixed(2)} mg`;
                                 }
                                 return ` ${context.dataset.label}: ${context.parsed.y.toFixed(2)} mg base`;
                             }
@@ -461,7 +533,13 @@
         });
     }
 
-    [startTimeInput, elvanseSlider, useAmfexaCheck, amfexaSlider, amfexaDelaySlider, useRefCheck, refSlider, sleepThresholdSlider].forEach(element => {
+    // Event Triggers
+    [
+        startTimeInput, useElvanseCheck, elvanseSlider, 
+        useAmfexa1Check, amfexa1Slider, amfexa1DelaySlider, 
+        useAmfexa2Check, amfexa2Slider, amfexa2DelaySlider, 
+        useRefCheck, refSlider, sleepThresholdSlider
+    ].forEach(element => {
         element.addEventListener('input', renderSimulation);
     });
 
