@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ADHD Medication & Sleep Visualizer</title>
-    <!-- Chart.js CDN for clean, reactive graphing -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -202,6 +201,36 @@
             color: #4b5563;
         }
 
+        /* Styled Input Box for Clickable Modification */
+        .value-input {
+            width: 50px;
+            background: #f1f5f9;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            padding: 2px 4px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #1a202c;
+            text-align: right;
+            font-family: inherit;
+        }
+
+        .value-input:focus {
+            outline: none;
+            border-color: var(--elvanse-theme);
+            background: #ffffff;
+        }
+
+        .value-input::-webkit-outer-spin-button,
+        .value-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .value-input {
+            -moz-appearance: textfield;
+        }
+
         .flex-header-row {
             display: flex;
             justify-content: space-between;
@@ -243,7 +272,6 @@
     <div class="dashboard">
         <div class="controls-column">
             
-            <!-- Timing Parameters Base -->
             <div class="input-box box-base">
                 <div class="input-group">
                     <label class="field-label">Wake up time / baseline start</label>
@@ -255,7 +283,6 @@
                 </div>
             </div>
 
-            <!-- Slot 1: Morning Profile -->
             <div class="input-box" id="morningCard">
                 <div class="box-title">
                     <div class="title-left-group">
@@ -274,13 +301,14 @@
                 <div class="input-group">
                     <div class="flex-header-row">
                         <label class="field-label">Dosage</label>
-                        <span id="morningDoseVal" class="value-display">45 mg</span>
+                        <span class="value-display">
+                            <input type="number" id="morningDoseInput" class="value-input" value="45"> mg
+                        </span>
                     </div>
                     <input type="range" id="morningDose" min="20" max="100" step="5" value="45">
                 </div>
             </div>
 
-            <!-- Slot 2: Afternoon Booster Track -->
             <div class="input-box" style="background: rgba(217, 70, 239, 0.01);">
                 <div class="box-title">
                     <div class="title-left-group">
@@ -311,9 +339,7 @@
                 </div>
             </div>
 
-            <!-- Attached Secondary Configuration Block Group -->
             <div class="view-options-group">
-                <!-- Sleep Threshold Line Config -->
                 <div class="input-box" style="border-radius: 9px 9px 0 0;">
                     <div class="box-title">
                         <div class="title-left-group">
@@ -330,7 +356,6 @@
                     </div>
                 </div>
 
-                <!-- Comparison Space -->
                 <div class="input-box" style="border-top: 1px solid #e2e8f0; border-radius: 0 0 9px 9px;">
                     <div class="box-title">
                         <div class="title-left-group">
@@ -356,7 +381,6 @@
 
         </div>
 
-        <!-- Graph Field Panel -->
         <div class="visualizer-card">
             <div style="position: relative; width:100%; height:100%; min-height: 540px;">
                 <canvas id="chartCanvas"></canvas>
@@ -376,7 +400,7 @@
     const stepDownBtn = document.getElementById('stepDown');
     const stepUpBtn = document.getElementById('stepUp');
     const morningDoseSlider = document.getElementById('morningDose');
-    const morningDoseVal = document.getElementById('morningDoseVal');
+    const morningDoseInput = document.getElementById('morningDoseInput');
     const morningCard = document.getElementById('morningCard');
     const morningDot = document.getElementById('morningDot');
     const useBoosterCheck = document.getElementById('useBooster');
@@ -402,7 +426,7 @@
         const state = {
             startTime: startTimeInput.value,
             morningType: document.querySelector('input[name="morningType"]:checked').value,
-            morningDose: morningDoseSlider.value,
+            morningDose: morningDoseInput.value,
             useBooster: useBoosterCheck.checked,
             boosterDose: boosterDoseSlider.value,
             boosterDelay: boosterDelaySlider.value,
@@ -425,6 +449,7 @@
             
             adjustMorningSliderLimits(state.morningType, false);
             
+            morningDoseInput.value = state.morningDose;
             morningDoseSlider.value = state.morningDose;
             useBoosterCheck.checked = state.useBooster;
             boosterDoseSlider.value = state.boosterDose;
@@ -440,15 +465,19 @@
     function adjustMorningSliderLimits(type, resetValue = true) {
         if (type === 'elvanse') {
             morningDoseSlider.min = "20"; morningDoseSlider.max = "100"; morningDoseSlider.step = "5";
-            if (resetValue) morningDoseSlider.value = "45";
+            if (resetValue) morningDoseInput.value = "45";
+            morningDoseSlider.value = morningDoseInput.value;
             morningDot.style.backgroundColor = "var(--elvanse-theme)";
             morningDoseSlider.style.accentColor = "var(--elvanse-theme)";
+            morningDoseInput.style.borderColor = "var(--border-color)";
             morningCard.style.backgroundColor = "rgba(59, 130, 246, 0.02)";
         } else {
             morningDoseSlider.min = "1.25"; morningDoseSlider.max = "20"; morningDoseSlider.step = "1.25";
-            if (resetValue) morningDoseSlider.value = "5";
+            if (resetValue) morningDoseInput.value = "5";
+            morningDoseSlider.value = morningDoseInput.value;
             morningDot.style.backgroundColor = "var(--amfexa-morning)";
             morningDoseSlider.style.accentColor = "var(--amfexa-morning)";
+            morningDoseInput.style.borderColor = "var(--border-color)";
             morningCard.style.backgroundColor = "rgba(251, 146, 60, 0.02)";
         }
     }
@@ -556,242 +585,9 @@
     function renderSimulation() {
         const baseStartTime = startTimeInput.value || "10:30";
         const morningType = document.querySelector('input[name="morningType"]:checked').value;
-        const morningDose = parseFloat(morningDoseSlider.value);
+        
+        let morningDose = parseFloat(morningDoseInput.value);
+        if (isNaN(morningDose)) morningDose = parseFloat(morningDoseSlider.value);
+        
         const addBooster = useBoosterCheck.checked;
-        const boosterDose = parseFloat(boosterDoseSlider.value);
-        const boosterDelay = parseFloat(boosterDelaySlider.value);
-        const addRef = useRefCheck.checked;
-        const refDose = parseFloat(refSlider.value);
-        const dropPercent = parseFloat(sleepThresholdSlider.value);
-
-        morningDoseVal.textContent = `${morningDose} mg`;
-        boosterDoseVal.textContent = `${boosterDose.toFixed(2)} mg`;
-        boosterDelayVal.textContent = `${boosterDelay.toFixed(1)}h later`;
-        refDoseVal.textContent = `${refDose} mg`;
-        sleepThresholdVal.textContent = `${dropPercent}% drop`;
-
-        boosterControls.style.opacity = addBooster ? '1' : '0.3';
-        refControls.style.display = addRef ? 'block' : 'none';
-
-        const rawLabels = [];
-        tickDataStore = [];
-        const morningData = [];
-        const boosterData = [];
-        const totalData = [];
-        const referenceData = [];
-
-        const mParams = pkin[morningType];
-        const bParams = pkin['amfexa'];
-
-        let metricPeak = 0;
-        for (let hour = 0; hour <= 30; hour += 0.5) {
-            let mVal = calculateConcentration(morningDose * mParams.bio, mParams.ka, mParams.ke, hour);
-            let bVal = addBooster ? calculateConcentration(boosterDose * bParams.bio, bParams.ka, bParams.ke, hour - boosterDelay) : 0;
-            if ((mVal + bVal) > metricPeak) metricPeak = (mVal + bVal);
-        }
-        if (metricPeak === 0) metricPeak = 1;
-
-        const dynamicThresholdValue = metricPeak * (1 - (dropPercent / 100));
-        const sleepLineData = [];
-
-        for (let hour = 0; hour <= 30; hour += 0.5) {
-            const timeObj = formatTimeLabel(baseStartTime, hour);
-            rawLabels.push(timeObj.clock);
-            tickDataStore.push(timeObj);
-
-            const cMorning = calculateConcentration(morningDose * mParams.bio, mParams.ka, mParams.ke, hour);
-            const cBooster = addBooster ? calculateConcentration(boosterDose * bParams.bio, bParams.ka, bParams.ke, hour - boosterDelay) : 0;
-            const cRef = addRef ? calculateConcentration(refDose * pkin.elvanse.bio, pkin.elvanse.ka, pkin.elvanse.ke, hour) : 0;
-
-            morningData.push(cMorning);
-            boosterData.push(cBooster);
-            totalData.push(cMorning + cBooster);
-            referenceData.push(cRef);
-            sleepLineData.push(dynamicThresholdValue);
-        }
-
-        if (simulationChart) {
-            simulationChart.data.labels = rawLabels;
-            simulationChart.data.datasets[0].data = totalData;
-            simulationChart.data.datasets[1].data = sleepLineData;
-            simulationChart.data.datasets[2].data = morningData;
-            simulationChart.data.datasets[2].borderColor = morningType === 'elvanse' ? '#3b82f6' : '#fb923c';
-            simulationChart.data.datasets[2].label = morningType === 'elvanse' ? 'Morning Base (Elvanse)' : 'Morning Base (Amfexa)';
-            simulationChart.data.datasets[3].data = boosterData;
-            simulationChart.data.datasets[3].hidden = !addBooster;
-            simulationChart.data.datasets[4].data = referenceData;
-            simulationChart.data.datasets[4].hidden = !addRef;
-            simulationChart.data.datasets[4].label = `Comparison Track (${refDose}mg Elvanse)`;
-            
-            simulationChart.update('none'); 
-            return;
-        }
-
-        simulationChart = new Chart(ctx, {
-            type: 'line',
-            plugins: [timelineEnhancementsPlugin],
-            data: {
-                labels: rawLabels,
-                datasets: [
-                    {
-                        label: 'Active System Profile',
-                        data: totalData,
-                        borderColor: '#6d28d9', /* Hardcoded solid violet */
-                        backgroundColor: 'rgba(109, 40, 217, 0.01)',
-                        fill: true,
-                        borderWidth: 2.5,
-                        pointRadius: 0,
-                        tension: 0.12
-                    },
-                    {
-                        label: 'Sleep Clearance Indicator',
-                        data: sleepLineData,
-                        borderColor: '#ef4444', /* Hardcoded bright red */
-                        borderWidth: 1.2,
-                        borderDash: [10, 4],
-                        fill: false,
-                        pointRadius: 0
-                    },
-                    {
-                        label: morningType === 'elvanse' ? 'Morning Base (Elvanse)' : 'Morning Base (Amfexa)',
-                        data: morningData,
-                        borderColor: morningType === 'elvanse' ? '#3b82f6' : '#fb923c', /* Royal Blue or Light Orange */
-                        borderDash: [4, 4],
-                        borderWidth: 1.2,
-                        fill: false,
-                        pointRadius: 0
-                    },
-                    {
-                        label: 'Slot 2 Booster',
-                        data: boosterData,
-                        borderColor: '#d946ef', /* Vibrant fuchsia */
-                        borderDash: [4, 4],
-                        borderWidth: 1.2,
-                        fill: false,
-                        pointRadius: 0,
-                        hidden: !addBooster
-                    },
-                    {
-                        label: `Comparison Track (${refDose}mg Elvanse)`,
-                        data: referenceData,
-                        borderColor: '#93c5fd', /* Light desaturated blue */
-                        borderDash: [8, 6],
-                        borderWidth: 1.5,
-                        fill: false,
-                        pointRadius: 0,
-                        hidden: !addRef
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: false, 
-                interaction: { mode: 'index', intersect: false },
-                scales: {
-                    x: {
-                        grid: {
-                            display: true,
-                            color: function(context) {
-                                if (context.index % 2 === 0) return 'rgba(0, 0, 0, 0.15)'; 
-                                return 'rgba(0, 0, 0, 0.03)'; 
-                            },
-                            lineWidth: function(context) {
-                                return context.index % 2 === 0 ? 1.2 : 1;
-                            }
-                        },
-                        ticks: {
-                            maxRotation: 0,
-                            autoSkip: false,
-                            callback: function(val, index) {
-                                if (index % 4 === 0) {
-                                    const tObj = tickDataStore[index];
-                                    return [tObj.clock, tObj.elapsed];
-                                }
-                                return null;
-                            },
-                            font: function(context) {
-                                if (context.index === 0) {
-                                    return { weight: '700', size: 10 };
-                                }
-                                if (tickDataStore && tickDataStore[context.index]) {
-                                    const tObj = tickDataStore[context.index];
-                                    if (tObj.totalMinutesAbsolute % 1440 === 0) {
-                                        return { weight: '700', size: 10 };
-                                    }
-                                }
-                                return { size: 9 };
-                            }
-                        }
-                    },
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: 'rgba(0,0,0,0.02)' },
-                        title: { display: true, text: 'Active Concentration (mg base equivalents)', font: { size: 11, weight: '600' } }
-                    }
-                },
-                plugins: {
-                    tooltip: {
-                        padding: 10,
-                        caretPadding: 16,
-                        callbacks: {
-                            title: function(context) {
-                                const idx = context[0].dataIndex;
-                                return `Time window: ${rawLabels[idx].replace('*', ' (next day)')} (${tickDataStore[idx].elapsed})`;
-                            },
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.parsed.y !== null) {
-                                    label += context.parsed.y.toFixed(2) + ' mg';
-                                }
-                                return label;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    document.querySelectorAll('input[name="morningType"]').forEach(radio => {
-        radio.addEventListener('change', (e) => {
-            adjustMorningSliderLimits(e.target.value, true);
-            renderSimulation();
-            saveState();
-        });
-    });
-
-    [morningDoseSlider, boosterDoseSlider, boosterDelaySlider, sleepThresholdSlider, refSlider].forEach(slider => {
-        slider.addEventListener('input', () => {
-            renderSimulation();
-            saveState();
-        });
-    });
-
-    [useBoosterCheck, useRefCheck].forEach(checkbox => {
-        checkbox.addEventListener('change', () => {
-            renderSimulation();
-            saveState();
-        });
-    });
-
-    startTimeInput.addEventListener('change', () => {
-        renderSimulation();
-        saveState();
-    });
-
-    stepDownBtn.addEventListener('click', () => handleTimeStep(-15));
-    stepUpBtn.addEventListener('click', () => handleTimeStep(15));
-
-    window.addEventListener('DOMContentLoaded', () => {
-        loadState();
-        const activeType = document.querySelector('input[name="morningType"]:checked').value;
-        adjustMorningSliderLimits(activeType, false);
-        renderSimulation();
-    });
-</script>
-</body>
-</html>
+        const boosterD
